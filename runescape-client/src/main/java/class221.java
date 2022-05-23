@@ -1,54 +1,59 @@
-import java.awt.Desktop;
-import java.awt.Desktop.Action;
-import java.net.URI;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("hp")
+@ObfuscatedName("hg")
 public class class221 {
-	@ObfuscatedName("g")
-	@Export("ByteArrayPool_altSizeArrayCounts")
-	static int[] ByteArrayPool_altSizeArrayCounts;
-
-	@ObfuscatedName("o")
+	@ObfuscatedName("ph")
 	@ObfuscatedSignature(
-		descriptor = "(Ljava/lang/String;ZLjava/lang/String;ZI)V",
-		garbageValue = "-1930935119"
+		descriptor = "Lpd;"
 	)
-	static void method4198(String var0, boolean var1, String var2, boolean var3) {
-		if (var1) { // L: 26
-			if (!var3 && Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE)) { // L: 27
-				try {
-					Desktop.getDesktop().browse(new URI(var0)); // L: 29
-					return; // L: 30
-				} catch (Exception var5) { // L: 32
-				}
-			}
+	@Export("HitSplatDefinition_cached")
+	static class428 HitSplatDefinition_cached;
 
-			if (class44.field294.startsWith("win") && !var3) { // L: 34 35
-				class311.method5605(var0, 0, "openjs");
-				return; // L: 39
-			}
+	@ObfuscatedName("s")
+	@ObfuscatedSignature(
+		descriptor = "(I)Lfo;",
+		garbageValue = "290100921"
+	)
+	public static Clock method4408() {
+		try {
+			return new NanoClock(); // L: 8
+		} catch (Throwable var1) { // L: 10
+			return new MilliClock(); // L: 11
+		}
+	}
 
-			if (class44.field294.startsWith("mac")) { // L: 42
-				class311.method5605(var0, 1, var2); // L: 43
-				return; // L: 44
-			}
+	@ObfuscatedName("ho")
+	@ObfuscatedSignature(
+		descriptor = "(IIIIIIIIIB)V",
+		garbageValue = "1"
+	)
+	@Export("updatePendingSpawn")
+	static final void updatePendingSpawn(int var0, int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8) {
+		PendingSpawn var9 = null; // L: 7815
 
-			class311.method5605(var0, 2, "openjs"); // L: 47
-		} else {
-			class311.method5605(var0, 3, "openjs"); // L: 52
+		for (PendingSpawn var10 = (PendingSpawn)Client.pendingSpawns.last(); var10 != null; var10 = (PendingSpawn)Client.pendingSpawns.previous()) { // L: 7816 7817 7822
+			if (var0 == var10.plane && var10.x == var1 && var2 == var10.y && var3 == var10.type) { // L: 7818
+				var9 = var10; // L: 7819
+				break;
+			}
 		}
 
-	} // L: 55
+		if (var9 == null) { // L: 7824
+			var9 = new PendingSpawn(); // L: 7825
+			var9.plane = var0; // L: 7826
+			var9.type = var3; // L: 7827
+			var9.x = var1; // L: 7828
+			var9.y = var2; // L: 7829
+			UrlRequester.method2536(var9); // L: 7830
+			Client.pendingSpawns.addFirst(var9); // L: 7831
+		}
 
-	@ObfuscatedName("g")
-	@ObfuscatedSignature(
-		descriptor = "(II)Z",
-		garbageValue = "1932340849"
-	)
-	public static boolean method4200(int var0) {
-		return (var0 >> 30 & 1) != 0; // L: 37
-	}
+		var9.id = var4; // L: 7833
+		var9.field1126 = var5; // L: 7834
+		var9.orientation = var6; // L: 7835
+		var9.delay = var7; // L: 7836
+		var9.hitpoints = var8; // L: 7837
+	} // L: 7838
 }

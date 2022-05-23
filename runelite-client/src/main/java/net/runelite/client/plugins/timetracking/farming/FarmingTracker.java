@@ -40,8 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.Varbits;
+import net.runelite.api.WidgetNode;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.vars.Autoweed;
 import net.runelite.api.widgets.WidgetModalMode;
 import net.runelite.client.Notifier;
 import net.runelite.client.config.ConfigManager;
@@ -63,6 +63,7 @@ public class FarmingTracker
 	private final TimeTrackingConfig config;
 	private final FarmingWorld farmingWorld;
 	private final Notifier notifier;
+	private final CompostTracker compostTracker;
 
 	private final Map<Tab, SummaryState> summaries = new EnumMap<>(Tab.class);
 
@@ -78,7 +79,7 @@ public class FarmingTracker
 	private boolean firstNotifyCheck = true;
 
 	@Inject
-	private FarmingTracker(Client client, ItemManager itemManager, ConfigManager configManager, TimeTrackingConfig config, FarmingWorld farmingWorld, Notifier notifier)
+	private FarmingTracker(Client client, ItemManager itemManager, ConfigManager configManager, TimeTrackingConfig config, FarmingWorld farmingWorld, Notifier notifier, CompostTracker compostTracker)
 	{
 		this.client = client;
 		this.itemManager = itemManager;
@@ -86,11 +87,12 @@ public class FarmingTracker
 		this.config = config;
 		this.farmingWorld = farmingWorld;
 		this.notifier = notifier;
+		this.compostTracker = compostTracker;
 	}
 
 	public FarmingTabPanel createTabPanel(Tab tab, FarmingContractManager farmingContractManager)
 	{
-		return new FarmingTabPanel(this, itemManager, configManager, config, farmingWorld.getTabs().get(tab), farmingContractManager);
+		return new FarmingTabPanel(this, compostTracker, itemManager, configManager, config, farmingWorld.getTabs().get(tab), farmingContractManager);
 	}
 
 	/**
@@ -101,15 +103,16 @@ public class FarmingTracker
 		boolean changed = false;
 
 		//Varbits don't get sent when a modal widget is open so just return
-		if (client.getComponentTable().getNodes()
-			.stream()
-			.anyMatch(widgetNode -> widgetNode.getModalMode() != WidgetModalMode.NON_MODAL))
+		for (WidgetNode widgetNode : client.getComponentTable())
 		{
-			return false;
+			if (widgetNode.getModalMode() != WidgetModalMode.NON_MODAL)
+			{
+				return false;
+			}
 		}
 
 		{
-			String autoweed = Integer.toString(client.getVar(Varbits.AUTOWEED));
+			String autoweed = Integer.toString(client.getVarbitValue(Varbits.AUTOWEED));
 			if (!autoweed.equals(configManager.getRSProfileConfiguration(TimeTrackingConfig.CONFIG_GROUP, TimeTrackingConfig.AUTOWEED)))
 			{
 				configManager.setRSProfileConfiguration(TimeTrackingConfig.CONFIG_GROUP, TimeTrackingConfig.AUTOWEED, autoweed);
@@ -118,7 +121,7 @@ public class FarmingTracker
 		}
 
 		{
-			boolean botanist = client.getVar(Varbits.LEAGUE_RELIC_5) == 1;
+			boolean botanist = client.getVarbitValue(Varbits.LEAGUE_RELIC_5) == 1;
 			if (!Boolean.valueOf(botanist).equals(configManager.getRSProfileConfiguration(TimeTrackingConfig.CONFIG_GROUP, TimeTrackingConfig.BOTANIST, Boolean.class)))
 			{
 				configManager.setRSProfileConfiguration(TimeTrackingConfig.CONFIG_GROUP, TimeTrackingConfig.BOTANIST, botanist);
@@ -142,10 +145,16 @@ public class FarmingTracker
 			for (FarmingPatch patch : region.getPatches())
 			{
 				// Write the config value if it doesn't match what is current, or it is more than 5 minutes old
-				Varbits varbit = patch.getVarbit();
+				int varbit = patch.getVarbit();
 				String key = patch.configKey();
-				String strVarbit = Integer.toString(client.getVar(varbit));
+				String strVarbit = Integer.toString(client.getVarbitValue(varbit));
 				String storedValue = configManager.getRSProfileConfiguration(TimeTrackingConfig.CONFIG_GROUP, key);
+
+				PatchState currentPatchState = patch.getImplementation().forVarbitValue(client.getVarbitValue(varbit));
+				if (currentPatchState == null)
+				{
+					continue;
+				}
 
 				if (storedValue != null)
 				{
@@ -171,9 +180,8 @@ public class FarmingTracker
 						else if (!newRegionLoaded && timeSinceModalClose > 1)
 						{
 							PatchState previousPatchState = patch.getImplementation().forVarbitValue(Integer.parseInt(parts[0]));
-							PatchState currentPatchState = patch.getImplementation().forVarbitValue(client.getVar(varbit));
 
-							if (previousPatchState == null || currentPatchState == null)
+							if (previousPatchState == null)
 							{
 								continue;
 							}
@@ -214,6 +222,11 @@ public class FarmingTracker
 							log.debug("ignoring growth tick for offset calculation; newRegionLoaded={} timeSinceModalClose={}", newRegionLoaded, timeSinceModalClose);
 						}
 					}
+				}
+
+				if (currentPatchState.getCropState() == CropState.DEAD || currentPatchState.getCropState() == CropState.HARVESTABLE)
+				{
+					compostTracker.setCompostState(patch, null);
 				}
 
 				String value = strVarbit + ":" + unixNow;
@@ -549,7 +562,7 @@ public class FarmingTracker
 			// Same RS account but different profile type
 			if (profileType != RuneScapeProfileType.getCurrent(client))
 			{
-				stringBuilder.append("(")
+				stringBuilder.append('(')
 					.append(Text.titleCase(profile.getType()))
 					.append(") ");
 			}
@@ -563,13 +576,13 @@ public class FarmingTracker
 				//Don't print profile type when logged out if is STANDARD
 				if (client.getGameState() == GameState.LOGIN_SCREEN && profileType == RuneScapeProfileType.STANDARD)
 				{
-					stringBuilder.append("(")
+					stringBuilder.append('(')
 						.append(profile.getDisplayName())
 						.append(") ");
 				}
 				else
 				{
-					stringBuilder.append("(")
+					stringBuilder.append('(')
 						.append(profile.getDisplayName())
 						.append(" - ")
 						.append(Text.titleCase(profile.getType()))
@@ -579,7 +592,7 @@ public class FarmingTracker
 			// Different RS account but same profile type
 			else
 			{
-				stringBuilder.append("(")
+				stringBuilder.append('(')
 					.append(profile.getDisplayName())
 					.append(") ");
 			}
@@ -615,7 +628,7 @@ public class FarmingTracker
 
 		stringBuilder.append(patch.getRegion().isDefinite() ? "the " : "")
 			.append(patch.getRegion().getName())
-			.append(".");
+			.append('.');
 
 		notifier.notify(stringBuilder.toString());
 	}

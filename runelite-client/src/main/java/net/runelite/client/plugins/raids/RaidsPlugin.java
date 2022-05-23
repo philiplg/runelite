@@ -67,6 +67,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatClient;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatCommandManager;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -96,7 +97,6 @@ import static net.runelite.client.util.Text.sanitize;
 import net.runelite.client.ws.PartyMember;
 import net.runelite.client.ws.PartyService;
 import net.runelite.client.ws.WSClient;
-import net.runelite.http.api.chat.ChatClient;
 import net.runelite.http.api.chat.LayoutRoom;
 import net.runelite.http.api.ws.messages.party.PartyChatMessage;
 
@@ -264,7 +264,7 @@ public class RaidsPlugin extends Plugin
 	public void onVarbitChanged(VarbitChanged event)
 	{
 		int tempPartyID = client.getVar(VarPlayer.IN_RAID_PARTY);
-		boolean tempInRaid = client.getVar(Varbits.IN_RAID) == 1;
+		boolean tempInRaid = client.getVarbitValue(Varbits.IN_RAID) == 1;
 
 		// if the player's party state has changed
 		if (tempPartyID != raidPartyID)
@@ -321,8 +321,8 @@ public class RaidsPlugin extends Plugin
 
 				if (config.pointsMessage())
 				{
-					int totalPoints = client.getVar(Varbits.TOTAL_POINTS);
-					int personalPoints = client.getVar(Varbits.PERSONAL_POINTS);
+					int totalPoints = client.getVarbitValue(Varbits.TOTAL_POINTS);
+					int personalPoints = client.getVarbitValue(Varbits.PERSONAL_POINTS);
 
 					double percentage = personalPoints / (totalPoints / 100.0);
 
@@ -425,7 +425,7 @@ public class RaidsPlugin extends Plugin
 			return;
 		}
 
-		inRaidChambers = client.getVar(Varbits.IN_RAID) == 1;
+		inRaidChambers = client.getVarbitValue(Varbits.IN_RAID) == 1;
 
 		if (!inRaidChambers)
 		{
@@ -830,7 +830,6 @@ public class RaidsPlugin extends Plugin
 		log.debug("Setting response {}", response);
 		final MessageNode messageNode = chatMessage.getMessageNode();
 		messageNode.setRuneLiteFormatMessage(response);
-		chatMessageManager.update(messageNode);
 		client.refreshChat();
 	}
 
@@ -872,7 +871,7 @@ public class RaidsPlugin extends Plugin
 		@Override
 		public void hotkeyPressed()
 		{
-			screenshotScoutOverlay();
+			clientThread.invoke(RaidsPlugin.this::screenshotScoutOverlay);
 		}
 	};
 

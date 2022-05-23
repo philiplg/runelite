@@ -69,7 +69,6 @@ import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.client.Notifier;
-import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -104,9 +103,6 @@ public class WintertodtPlugin extends Plugin
 
 	@Inject
 	private WintertodtConfig config;
-
-	@Inject
-	private ChatMessageManager chatMessageManager;
 
 	@Getter(AccessLevel.PACKAGE)
 	private WintertodtActivity currentActivity = WintertodtActivity.IDLE;
@@ -198,7 +194,7 @@ public class WintertodtPlugin extends Plugin
 	@Subscribe
 	public void onVarbitChanged(VarbitChanged varbitChanged)
 	{
-		int timerValue = client.getVar(Varbits.WINTERTODT_TIMER);
+		int timerValue = client.getVarbitValue(Varbits.WINTERTODT_TIMER);
 		if (timerValue != previousTimerValue)
 		{
 			int timeToNotify = config.roundNotification();
@@ -260,6 +256,12 @@ public class WintertodtPlugin extends Plugin
 		MessageNode messageNode = chatMessage.getMessageNode();
 		final WintertodtInterruptType interruptType;
 
+		if (messageNode.getValue().startsWith("You carefully fletch the root"))
+		{
+			setActivity(WintertodtActivity.FLETCHING);
+			return;
+		}
+
 		if (messageNode.getValue().startsWith("The cold of"))
 		{
 			interruptType = WintertodtInterruptType.COLD;
@@ -308,7 +310,6 @@ public class WintertodtPlugin extends Plugin
 
 				// Recolor message for damage notification
 				messageNode.setRuneLiteFormatMessage(ColorUtil.wrapWithColorTag(messageNode.getValue(), config.damageNotificationColor()));
-				chatMessageManager.update(messageNode);
 				client.refreshChat();
 
 				// all actions except woodcutting and idle are interrupted from damage

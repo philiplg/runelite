@@ -47,10 +47,8 @@ import net.runelite.client.events.SessionClose;
 import net.runelite.client.events.SessionOpen;
 import net.runelite.client.util.LinkBrowser;
 import net.runelite.client.ws.WSClient;
-import net.runelite.http.api.account.AccountClient;
 import net.runelite.http.api.account.OAuthResponse;
 import net.runelite.http.api.ws.messages.LoginResponse;
-import okhttp3.OkHttpClient;
 
 @Singleton
 @Slf4j
@@ -72,14 +70,14 @@ public class SessionManager
 		ConfigManager configManager,
 		EventBus eventBus,
 		WSClient wsClient,
-		OkHttpClient okHttpClient,
+		AccountClient accountClient,
 		Gson gson)
 	{
 		this.configManager = configManager;
 		this.eventBus = eventBus;
 		this.wsClient = wsClient;
 		this.sessionFile = sessionfile;
-		this.accountClient = new AccountClient(okHttpClient);
+		this.accountClient = accountClient;
 		this.gson = gson;
 
 		eventBus.register(this);
@@ -162,7 +160,9 @@ public class SessionManager
 		{
 			// Initialize config for new session
 			// If the session isn't logged in yet, don't switch to the new config
-			configManager.switchSession(session);
+
+			//This switches to a config context that can't be uploaded/downloaded, "resetting" every startup
+			//configManager.switchSession(session);
 		}
 
 		eventBus.post(new SessionOpen());
@@ -186,7 +186,7 @@ public class SessionManager
 		}
 		catch (IOException ex)
 		{
-			log.warn("Unable to logout of session", ex);
+			log.warn("Unable to sign out of session", ex);
 		}
 
 		accountSession = null; // No more account
@@ -225,7 +225,7 @@ public class SessionManager
 	@Subscribe
 	public void onLoginResponse(LoginResponse loginResponse)
 	{
-		log.debug("Now logged in as {}", loginResponse.getUsername());
+		log.debug("Now signed in as {}", loginResponse.getUsername());
 
 		AccountSession session = getAccountSession();
 		session.setUsername(loginResponse.getUsername());

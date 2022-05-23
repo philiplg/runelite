@@ -29,7 +29,6 @@ buildscript {
     repositories {
         mavenLocal()
         gradlePluginPortal()
-        maven(url = "https://repo.openosrs.com/repository/maven/")
         maven(url = "https://raw.githubusercontent.com/open-osrs/hosting/master")
     }
     dependencies {
@@ -43,7 +42,7 @@ plugins {
     application
 }
 
-val localGitCommit = try {
+val localGitCommit: String = try {
     val projectPath = rootProject.projectDir.absolutePath
     Grgit.open(mapOf("dir" to projectPath)).head().id
 } catch (_: Exception) {
@@ -60,13 +59,6 @@ subprojects {
     repositories {
         if (System.getenv("JITPACK") != null) {
             mavenLocal()
-        }
-
-        jcenter {
-            content {
-                excludeGroupByRegex("com\\.openosrs.*")
-                excludeGroupByRegex("com\\.runelite.*")
-            }
         }
 
         exclusiveContent {
@@ -104,7 +96,7 @@ subprojects {
             }
         }
 
-        maven(url = "https://mvnrepository.com/artifact")
+        mavenCentral()
     }
 
     apply<JavaLibraryPlugin>()
@@ -118,7 +110,7 @@ subprojects {
 
         configure<CheckstyleExtension> {
             maxWarnings = 0
-            toolVersion = "8.25"
+            toolVersion = "9.1"
             isShowViolations = true
             isIgnoreFailures = false
         }
@@ -169,6 +161,30 @@ subprojects {
             exclude("**/ScriptVarType.java")
             exclude("**/LayoutSolver.java")
             exclude("**/RoomType.java")
+        }
+
+        withType<Jar> {
+            doLast {
+                // sign jar
+                if (System.getProperty("signKeyStore") != null) {
+                    // ensure ant is initialized so we can copy the project variable later
+                    ant.invokeMethod("echo", mapOf("message" to "initializing ant"))
+
+                    for (file in outputs.files) {
+                        org.apache.tools.ant.taskdefs.SignJar().apply {
+                            // why is this required
+                            project = ant.project
+
+                            setKeystore(System.getProperty("signKeyStore"))
+                            setStorepass(System.getProperty("signStorePass"))
+                            setAlias(System.getProperty("signAlias"))
+                            setJar(file)
+                            setSignedjar(file)
+                            execute()
+                        }
+                    }
+                }
+            }
         }
     }
 

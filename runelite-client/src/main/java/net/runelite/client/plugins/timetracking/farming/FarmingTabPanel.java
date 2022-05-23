@@ -35,7 +35,6 @@ import java.util.Set;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.game.ItemManager;
@@ -44,11 +43,12 @@ import net.runelite.client.plugins.timetracking.TimeTrackingConfig;
 import net.runelite.client.plugins.timetracking.TimeablePanel;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
+import net.runelite.client.util.AsyncBufferedImage;
 
-@Slf4j
 public class FarmingTabPanel extends TabContentPanel
 {
 	private final FarmingTracker farmingTracker;
+	private final CompostTracker compostTracker;
 	private final ItemManager itemManager;
 	private final ConfigManager configManager;
 	private final TimeTrackingConfig config;
@@ -57,6 +57,7 @@ public class FarmingTabPanel extends TabContentPanel
 
 	FarmingTabPanel(
 		FarmingTracker farmingTracker,
+		CompostTracker compostTracker,
 		ItemManager itemManager,
 		ConfigManager configManager,
 		TimeTrackingConfig config,
@@ -65,6 +66,7 @@ public class FarmingTabPanel extends TabContentPanel
 	)
 	{
 		this.farmingTracker = farmingTracker;
+		this.compostTracker = compostTracker;
 		this.itemManager = itemManager;
 		this.configManager = configManager;
 		this.config = config;
@@ -133,7 +135,6 @@ public class FarmingTabPanel extends TabContentPanel
 				p.setBorder(null);
 			}
 		}
-
 	}
 
 	@Override
@@ -152,10 +153,26 @@ public class FarmingTabPanel extends TabContentPanel
 			FarmingPatch patch = panel.getTimeable();
 			PatchPrediction prediction = farmingTracker.predictPatch(patch);
 
+			CompostState compostState = compostTracker.getCompostState(patch);
+			String compostTooltip = "";
+			if (compostState != null)
+			{
+				AsyncBufferedImage compostImg = itemManager.getImage(compostState.getItemId());
+				Runnable compostOverlayRunnable = () -> panel.setOverlayIconImage(compostImg);
+				compostImg.onLoaded(compostOverlayRunnable);
+				compostOverlayRunnable.run();
+
+				compostTooltip = " with " + compostState.name().toLowerCase();
+			}
+			else
+			{
+				panel.setOverlayIconImage(null);
+			}
+
 			if (prediction == null)
 			{
 				itemManager.getImage(Produce.WEEDS.getItemID()).addTo(panel.getIcon());
-				panel.getIcon().setToolTipText("Unknown state");
+				panel.getIcon().setToolTipText("Unknown state" + compostTooltip);
 				panel.getProgress().setMaximumValue(0);
 				panel.getProgress().setValue(0);
 				panel.getProgress().setVisible(false);
@@ -167,12 +184,12 @@ public class FarmingTabPanel extends TabContentPanel
 				if (prediction.getProduce().getItemID() < 0)
 				{
 					panel.getIcon().setIcon(null);
-					panel.getIcon().setToolTipText("Unknown state");
+					panel.getIcon().setToolTipText("Unknown state" + compostTooltip);
 				}
 				else
 				{
 					itemManager.getImage(prediction.getProduce().getItemID()).addTo(panel.getIcon());
-					panel.getIcon().setToolTipText(prediction.getProduce().getName());
+					panel.getIcon().setToolTipText(prediction.getProduce().getName() + compostTooltip);
 				}
 
 				switch (prediction.getCropState())

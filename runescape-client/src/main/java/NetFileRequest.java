@@ -4,42 +4,35 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ic")
+@ObfuscatedName("li")
 @Implements("NetFileRequest")
 public class NetFileRequest extends DualNode {
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "Lig;"
+		descriptor = "Lle;"
 	)
 	@Export("archive")
-	Archive archive;
-	@ObfuscatedName("o")
+	public Archive archive;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -8399381
+		intValue = 211628067
 	)
 	@Export("crc")
-	int crc;
-	@ObfuscatedName("u")
+	public int crc;
+	@ObfuscatedName("l")
 	@Export("padding")
-	byte padding;
+	public byte padding;
 
 	NetFileRequest() {
 	} // L: 10
 
-	@ObfuscatedName("gc")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(I)V",
-		garbageValue = "-392050849"
+		descriptor = "(Ljava/lang/CharSequence;B)Z",
+		garbageValue = "112"
 	)
-	static final void method4472() {
-		for (PendingSpawn var0 = (PendingSpawn)Client.pendingSpawns.last(); var0 != null; var0 = (PendingSpawn)Client.pendingSpawns.previous()) { // L: 6816 6817 6823
-			if (var0.hitpoints == -1) { // L: 6818
-				var0.delay = 0; // L: 6819
-				class341.method6017(var0); // L: 6820
-			} else {
-				var0.remove(); // L: 6822
-			}
-		}
-
-	} // L: 6825
+	@Export("isNumber")
+	public static boolean isNumber(CharSequence var0) {
+		return class162.method3207(var0, 10, true); // L: 35
+	}
 }

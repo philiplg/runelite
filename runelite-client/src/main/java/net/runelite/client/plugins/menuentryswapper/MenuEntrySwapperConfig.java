@@ -24,6 +24,7 @@
  */
 package net.runelite.client.plugins.menuentryswapper;
 
+import lombok.RequiredArgsConstructor;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -66,6 +67,65 @@ public interface MenuEntrySwapperConfig extends Config
 	)
 	String uiSection = "ui";
 
+	enum ArdougneCloakMode
+	{
+		WEAR,
+		MONASTERY,
+		FARM,
+	}
+
+	enum KaramjaGlovesMode
+	{
+		WEAR,
+		GEM_MINE,
+		DURADEL,
+	}
+
+	enum MorytaniaLegsMode
+	{
+		WEAR,
+		ECTOFUNTUS,
+		BURGH_DE_ROTT;
+
+		@Override
+		public String toString()
+		{
+			switch (this)
+			{
+				case BURGH_DE_ROTT:
+					return "Burgh de Rott";
+				default:
+					return name();
+			}
+		}
+	}
+
+	enum RadasBlessingMode
+	{
+		EQUIP,
+		KOUREND_WOODLAND,
+		MOUNT_KARUULM,
+	}
+
+	enum DesertAmuletMode
+	{
+		WEAR,
+		NARDAH,
+		KALPHITE_CAVE,
+	}
+
+	@ConfigItem(
+		position = -3,
+		keyName = "leftClickCustomization",
+		name = "Customizable left-click",
+		description = "Allows customization of left-clicks on items",
+		section = itemSection
+	)
+	default boolean leftClickCustomization()
+	{
+		return true;
+	}
+
 	@ConfigItem(
 		position = -2,
 		keyName = "shiftClickCustomization",
@@ -74,6 +134,30 @@ public interface MenuEntrySwapperConfig extends Config
 		section = itemSection
 	)
 	default boolean shiftClickCustomization()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		position = -2,
+		keyName = "objectLeftClickCustomization",
+		name = "Customizable left-click",
+		description = "Allows customization of left-clicks on objects",
+		section = objectSection
+	)
+	default boolean objectLeftClickCustomization()
+	{
+		return true;
+	}
+
+	@ConfigItem(
+		position = -2,
+		keyName = "npcLeftClickCustomization",
+		name = "Customizable left-click",
+		description = "Allows customization of left-clicks on NPCs",
+		section = npcSection
+	)
+	default boolean npcLeftClickCustomization()
 	{
 		return true;
 	}
@@ -420,6 +504,72 @@ public interface MenuEntrySwapperConfig extends Config
 	}
 
 	@ConfigItem(
+		keyName = "swapTeleToPoh",
+		name = "Tele to POH",
+		description = "Swap Wear with Tele to POH on the construction cape",
+		section = itemSection
+	)
+	default boolean swapTeleToPoh()
+	{
+		return false;
+	}
+
+	@ConfigItem(
+		keyName = "swapKaramjaGloves",
+		name = "Karamja Gloves",
+		description = "Swap Wear with the Gem Mine or Duradel teleport on the Karamja Gloves 3 and 4",
+		section = itemSection
+	)
+	default KaramjaGlovesMode swapKaramjaGlovesMode()
+	{
+		return KaramjaGlovesMode.WEAR;
+	}
+
+	@ConfigItem(
+		keyName = "swapArdougneCloak",
+		name = "Ardougne Cloak",
+		description = "Swap Wear with Monastery Teleport or Farm Teleport on the Ardougne cloak.",
+		section = itemSection
+	)
+	default ArdougneCloakMode swapArdougneCloakMode()
+	{
+		return ArdougneCloakMode.WEAR;
+	}
+
+	@ConfigItem(
+		keyName = "swapRadasBlessing",
+		name = "Rada's Blessing",
+		description = "Swap Equip with the Woodland or Mount Karuulm teleport on Rada's Blessing.",
+		section = itemSection
+	)
+	default RadasBlessingMode swapRadasBlessingMode()
+	{
+		return RadasBlessingMode.EQUIP;
+	}
+
+	@ConfigItem(
+		keyName = "swapMorytaniaLegs",
+		name = "Morytania Legs",
+		description = "Swap Wear with the Ectofunctus or Burgh de Rott teleport on the Morytania Legs.",
+		section = itemSection
+	)
+	default MorytaniaLegsMode swapMorytaniaLegsMode()
+	{
+		return MorytaniaLegsMode.WEAR;
+	}
+
+	@ConfigItem(
+		keyName = "swapDesertAmulet",
+		name = "Desert Amulet",
+		description = "Swap Wear with the Nardah or Kalphite Cave teleport on Desert Amulet 4.",
+		section = itemSection
+	)
+	default DesertAmuletMode swapDesertAmuletMode()
+	{
+		return DesertAmuletMode.WEAR;
+	}
+
+	@ConfigItem(
 		keyName = "swapAbyssTeleport",
 		name = "Teleport to Abyss",
 		description = "Swap Talk-to with Teleport for the Mage of Zamorak",
@@ -463,10 +613,38 @@ public interface MenuEntrySwapperConfig extends Config
 		return true;
 	}
 
+	@RequiredArgsConstructor
+	enum HouseTeleportMode
+	{
+		CAST("Cast"),
+		OUTSIDE("Outside"),
+		GROUP_CHOOSE("Group: Choose"),
+		GROUP_PREVIOUS("Group: Previous");
+
+		private final String name;
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+	}
+
+	@ConfigItem(
+		keyName = "swapHouseTeleportSpell",
+		name = "House teleport",
+		description = "Swap house teleport spell to a different destination on shift",
+		section = uiSection
+	)
+	default HouseTeleportMode swapHouseTeleportSpell()
+	{
+		return HouseTeleportMode.OUTSIDE;
+	}
+
 	@ConfigItem(
 		keyName = "swapTeleportSpell",
 		name = "Shift-click teleport spells",
-		description = "Swap teleport spells that have a second destination on shift",
+		description = "Swap teleport spells that have a second destination, except for teleport to house, on shift",
 		section = uiSection
 	)
 	default boolean swapTeleportSpell()
@@ -510,8 +688,7 @@ public interface MenuEntrySwapperConfig extends Config
 	@ConfigItem(
 		keyName = "swapGEAbort",
 		name = "GE Abort",
-		description = "Swap abort offer on Grand Exchange offers when shift-clicking"
-		,
+		description = "Swap abort offer on Grand Exchange offers when shift-clicking",
 		section = uiSection
 	)
 	default boolean swapGEAbort()
@@ -660,6 +837,35 @@ public interface MenuEntrySwapperConfig extends Config
 	default boolean swapRowboatDive()
 	{
 		return false;
+	}
+
+	enum StairsMode
+	{
+		CLIMB,
+		CLIMB_UP,
+		CLIMB_DOWN,
+	}
+
+	@ConfigItem(
+		keyName = "swapStairsLeftClick",
+		name = "Stairs left-click",
+		description = "Swap this option when left-clicking stairs. Also works on ladders.",
+		section = objectSection
+	)
+	default StairsMode swapStairsLeftClick()
+	{
+		return StairsMode.CLIMB;
+	}
+
+	@ConfigItem(
+		keyName = "swapStairsShiftClick",
+		name = "Stairs shift-click",
+		description = "Swap this option when shift-clicking stairs. Also works on ladders.",
+		section = objectSection
+	)
+	default StairsMode swapStairsShiftClick()
+	{
+		return StairsMode.CLIMB;
 	}
 
 	@ConfigItem(

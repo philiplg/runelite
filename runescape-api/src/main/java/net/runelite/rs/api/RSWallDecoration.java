@@ -15,6 +15,9 @@ public interface RSWallDecoration extends DecorativeObject
 	@Import("y")
 	int getY();
 
+	@Import("z")
+	int getZ();
+
 	@Import("xOffset")
 	int getXOffset();
 
@@ -31,6 +34,10 @@ public interface RSWallDecoration extends DecorativeObject
 	@Import("renderable2")
 	@Override
 	RSRenderable getRenderable2();
+
+	@Import("flags")
+	@Override
+	int getConfig();
 
 	void setPlane(int plane);
 }

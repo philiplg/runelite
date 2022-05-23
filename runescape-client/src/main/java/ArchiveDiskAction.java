@@ -4,49 +4,39 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("if")
+@ObfuscatedName("ky")
 @Implements("ArchiveDiskAction")
 public class ArchiveDiskAction extends Node {
-	@ObfuscatedName("f")
+	@ObfuscatedName("m")
+	@Export("PcmPlayer_stereo")
+	protected static boolean PcmPlayer_stereo;
+	@ObfuscatedName("ca")
+	@ObfuscatedSignature(
+		descriptor = "Lqd;"
+	)
+	static IndexedSprite field3997;
+	@ObfuscatedName("o")
 	@ObfuscatedGetter(
-		intValue = 21153019
+		intValue = 834168287
 	)
 	@Export("type")
 	int type;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@Export("data")
 	public byte[] data;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "Llp;"
+		descriptor = "Lnc;"
 	)
 	@Export("archiveDisk")
 	public ArchiveDisk archiveDisk;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		descriptor = "Lig;"
+		descriptor = "Lle;"
 	)
 	@Export("archive")
 	public Archive archive;
 
 	ArchiveDiskAction() {
 	} // L: 12
-
-	@ObfuscatedName("fv")
-	@ObfuscatedSignature(
-		descriptor = "(IIII)V",
-		garbageValue = "-2035889570"
-	)
-	@Export("queueSoundEffect")
-	static void queueSoundEffect(int var0, int var1, int var2) {
-		if (Login.clientPreferences.soundEffectsVolume != 0 && var1 != 0 && Client.soundEffectCount < 50) { // L: 3082
-			Client.soundEffectIds[Client.soundEffectCount] = var0; // L: 3083
-			Client.queuedSoundEffectLoops[Client.soundEffectCount] = var1; // L: 3084
-			Client.queuedSoundEffectDelays[Client.soundEffectCount] = var2; // L: 3085
-			Client.soundEffects[Client.soundEffectCount] = null; // L: 3086
-			Client.soundLocations[Client.soundEffectCount] = 0; // L: 3087
-			++Client.soundEffectCount; // L: 3088
-		}
-
-	} // L: 3090
 }

@@ -43,6 +43,7 @@ import net.runelite.api.geometry.SimplePolygon;
 import net.runelite.api.model.Jarvis;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetInfo;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * A utility class containing methods to help with conversion between
@@ -123,24 +124,25 @@ public class Perspective
 			y -= client.getCameraY();
 			z -= client.getCameraZ();
 
-			int cameraPitch = client.getCameraPitch();
-			int cameraYaw = client.getCameraYaw();
+			final int cameraPitch = client.getCameraPitch();
+			final int cameraYaw = client.getCameraYaw();
 
-			int pitchSin = SINE[cameraPitch];
-			int pitchCos = COSINE[cameraPitch];
-			int yawSin = SINE[cameraYaw];
-			int yawCos = COSINE[cameraYaw];
+			final int pitchSin = SINE[cameraPitch];
+			final int pitchCos = COSINE[cameraPitch];
+			final int yawSin = SINE[cameraYaw];
+			final int yawCos = COSINE[cameraYaw];
 
-			int var8 = yawCos * x + y * yawSin >> 16;
-			y = yawCos * y - yawSin * x >> 16;
-			x = var8;
-			var8 = pitchCos * z - y * pitchSin >> 16;
-			y = z * pitchSin + y * pitchCos >> 16;
+			final int
+				x1 = x * yawCos + y * yawSin >> 16,
+				y1 = y * yawCos - x * yawSin >> 16,
+				y2 = z * pitchCos - y1 * pitchSin >> 16,
+				z1 = y1 * pitchCos + z * pitchSin >> 16;
 
-			if (y >= 50)
+			if (z1 >= 50)
 			{
-				int pointX = client.getViewportWidth() / 2 + x * client.getScale() / y;
-				int pointY = client.getViewportHeight() / 2 + var8 * client.getScale() / y;
+				final int scale = client.getScale();
+				final int pointX = client.getViewportWidth() / 2 + x1 * scale / z1;
+				final int pointY = client.getViewportHeight() / 2 + y2 * scale / z1;
 				return new Point(
 					pointX + client.getViewportXOffset(),
 					pointY + client.getViewportYOffset());
@@ -151,9 +153,88 @@ public class Perspective
 	}
 
 	/**
-	 * Translates a model's vertices into 2d space
+	 * Translates a model's vertices into 2d space. There is a separate implementation for GPU since GPU
+	 * uses a slightly more precise projection that can cause features like model outlines being noticeably
+	 * off otherwise.
 	 */
 	public static void modelToCanvas(Client client, int end, int x3dCenter, int y3dCenter, int z3dCenter, int rotate, int[] x3d, int[] y3d, int[] z3d, int[] x2d, int[] y2d)
+	{
+		if (client.isGpu())
+		{
+			modelToCanvasGpu(client, end, x3dCenter, y3dCenter, z3dCenter, rotate, x3d, y3d, z3d, x2d, y2d);
+		}
+		else
+		{
+			modelToCanvasCpu(client, end, x3dCenter, y3dCenter, z3dCenter, rotate, x3d, y3d, z3d, x2d, y2d);
+		}
+	}
+
+	private static void modelToCanvasGpu(Client client, int end, int x3dCenter, int y3dCenter, int z3dCenter, int rotate, int[] x3d, int[] y3d, int[] z3d, int[] x2d, int[] y2d)
+	{
+		final int
+			cameraPitch = client.getCameraPitch(),
+			cameraYaw = client.getCameraYaw();
+		final float
+			pitchSin = SINE[cameraPitch] / 65536.0f,
+			pitchCos = COSINE[cameraPitch] / 65536.0f,
+			yawSin = SINE[cameraYaw] / 65536.0f,
+			yawCos = COSINE[cameraYaw] / 65536.0f,
+			rotateSin = SINE[rotate] / 65536.0f,
+			rotateCos = COSINE[rotate] / 65536.0f,
+
+			cx = x3dCenter - client.getCameraX(),
+			cy = y3dCenter - client.getCameraY(),
+			cz = z3dCenter - client.getCameraZ(),
+
+			viewportXMiddle = client.getViewportWidth() / 2f,
+			viewportYMiddle = client.getViewportHeight() / 2f,
+			viewportXOffset = client.getViewportXOffset(),
+			viewportYOffset = client.getViewportYOffset(),
+
+			zoom3d = client.getScale();
+
+		for (int i = 0; i < end; i++)
+		{
+			float x = x3d[i];
+			float y = y3d[i];
+			float z = z3d[i];
+
+			if (rotate != 0)
+			{
+				float x0 = x;
+				x = x0 * rotateCos + y * rotateSin;
+				y = y * rotateCos - x0 * rotateSin;
+			}
+
+			x += cx;
+			y += cy;
+			z += cz;
+
+			final float
+				x1 = x * yawCos + y * yawSin,
+				y1 = y * yawCos - x * yawSin,
+				y2 = z * pitchCos - y1 * pitchSin,
+				z1 = y1 * pitchCos + z * pitchSin;
+
+			int viewX, viewY;
+
+			if (z1 < 50)
+			{
+				viewX = Integer.MIN_VALUE;
+				viewY = Integer.MIN_VALUE;
+			}
+			else
+			{
+				viewX = Math.round((viewportXMiddle + x1 * zoom3d / z1) + viewportXOffset);
+				viewY = Math.round((viewportYMiddle + y2 * zoom3d / z1) + viewportYOffset);
+			}
+
+			x2d[i] = viewX;
+			y2d[i] = viewY;
+		}
+	}
+
+	private static void modelToCanvasCpu(Client client, int end, int x3dCenter, int y3dCenter, int z3dCenter, int rotate, int[] x3d, int[] y3d, int[] z3d, int[] x2d, int[] y2d)
 	{
 		final int
 			cameraPitch = client.getCameraPitch(),
@@ -256,7 +337,7 @@ public class Perspective
 			Widget minimapDrawWidget;
 			if (client.isResized())
 			{
-				if (client.getVar(Varbits.SIDE_PANELS) == 1)
+				if (client.getVarbitValue(Varbits.SIDE_PANELS) == 1)
 				{
 					minimapDrawWidget = client.getWidget(WidgetInfo.RESIZABLE_MINIMAP_DRAW_AREA);
 				}
@@ -411,21 +492,14 @@ public class Perspective
 		int plane,
 		int zOffset)
 	{
-		final int swX = localLocation.getX() - (sizeX * LOCAL_TILE_SIZE / 2);
-		final int swY = localLocation.getY() - (sizeY * LOCAL_TILE_SIZE / 2);
-
-		final int neX = localLocation.getX() + (sizeX * LOCAL_TILE_SIZE / 2);
-		final int neY = localLocation.getY() + (sizeY * LOCAL_TILE_SIZE / 2);
-
-		final byte[][][] tileSettings = client.getTileSettings();
-
-		final int sceneX = localLocation.getSceneX();
-		final int sceneY = localLocation.getSceneY();
-
-		if (sceneX < 0 || sceneY < 0 || sceneX >= SCENE_SIZE || sceneY >= SCENE_SIZE)
+		if (!localLocation.isInScene())
 		{
 			return null;
 		}
+
+		final byte[][][] tileSettings = client.getTileSettings();
+		final int sceneX = localLocation.getSceneX();
+		final int sceneY = localLocation.getSceneY();
 
 		int tilePlane = plane;
 		if (plane < Constants.MAX_Z - 1 && (tileSettings[1][sceneX][sceneY] & TILE_FLAG_BRIDGE) == TILE_FLAG_BRIDGE)
@@ -433,15 +507,27 @@ public class Perspective
 			tilePlane = plane + 1;
 		}
 
+		final int swX = localLocation.getX() - (sizeX * LOCAL_TILE_SIZE / 2);
+		final int swY = localLocation.getY() - (sizeY * LOCAL_TILE_SIZE / 2);
+
+		final int neX = localLocation.getX() + (sizeX * LOCAL_TILE_SIZE / 2);
+		final int neY = localLocation.getY() + (sizeY * LOCAL_TILE_SIZE / 2);
+
+		final int seX = swX;
+		final int seY = neY;
+
+		final int nwX = neX;
+		final int nwY = swY;
+
 		final int swHeight = getHeight(client, swX, swY, tilePlane) - zOffset;
-		final int nwHeight = getHeight(client, neX, swY, tilePlane) - zOffset;
+		final int nwHeight = getHeight(client, nwX, nwY, tilePlane) - zOffset;
 		final int neHeight = getHeight(client, neX, neY, tilePlane) - zOffset;
-		final int seHeight = getHeight(client, swX, neY, tilePlane) - zOffset;
+		final int seHeight = getHeight(client, seX, seY, tilePlane) - zOffset;
 
 		Point p1 = localToCanvas(client, swX, swY, swHeight);
-		Point p2 = localToCanvas(client, neX, swY, nwHeight);
+		Point p2 = localToCanvas(client, nwX, nwY, nwHeight);
 		Point p3 = localToCanvas(client, neX, neY, neHeight);
-		Point p4 = localToCanvas(client, swX, neY, seHeight);
+		Point p4 = localToCanvas(client, seX, seY, seHeight);
 
 		if (p1 == null || p2 == null || p3 == null || p4 == null)
 		{
@@ -596,7 +682,7 @@ public class Perspective
 	 * @param point       the coordinate of the tile
 	 * @return the clickable area of the model
 	 */
-	@Nullable
+	@Deprecated(since = "4.20.4", forRemoval = true)
 	public static Shape getClickbox(@Nonnull Client client, Model model, int orientation, LocalPoint point)
 	{
 		if (model == null)
@@ -607,6 +693,31 @@ public class Perspective
 		int x = point.getX();
 		int y = point.getY();
 		int z = getTileHeight(client, point, client.getPlane());
+
+		return getClickbox(client, model, orientation, x, y, z);
+	}
+
+	/**
+	 * You don't want this. Use {@link //TileObject#getClickbox()} instead.
+	 * <p>
+	 * Get the on-screen clickable area of {@code model} as though it's for the
+	 * object on the tile at ({@code localX}, {@code localY}) and rotated to
+	 * angle {@code orientation}.
+	 * @param client      the game client
+	 * @param model       the model to calculate a clickbox for
+	 * @param orientation the orientation of the model (0-2048, where 0 is north)
+	 * @param x           x coord in local space
+	 * @param z           y coord in local space
+	 * @return the clickable area of the model
+	 */
+	@Nullable
+	@ApiStatus.Internal
+	public static Shape getClickbox(@Nonnull Client client, Model model, int orientation, int x, int y, int z)
+	{
+		if (model == null)
+		{
+			return null;
+		}
 
 		SimplePolygon bounds = calculateAABB(client, model, orientation, x, y, z);
 
@@ -636,19 +747,13 @@ public class Perspective
 
 	private static SimplePolygon calculateAABB(Client client, Model m, int jauOrient, int x, int y, int z)
 	{
-		int ex = m.getExtremeX();
-		if (ex == -1)
-		{
-			// dynamic models don't get stored when they render where this normally happens
-			m.calculateBoundsCylinder();
-			m.calculateExtreme(0);
-			ex = m.getExtremeX();
-		}
+		m.calculateExtreme(jauOrient);
 
 		int x1 = m.getCenterX();
 		int y1 = m.getCenterZ();
 		int z1 = m.getCenterY();
 
+		int ex = m.getExtremeX();
 		int ey = m.getExtremeZ();
 		int ez = m.getExtremeY();
 
@@ -676,7 +781,7 @@ public class Perspective
 		int[] x2d = new int[8];
 		int[] y2d = new int[8];
 
-		modelToCanvas(client, 8, x, y, z, jauOrient, xa, ya, za, x2d, y2d);
+		modelToCanvasCpu(client, 8, x, y, z, 0, xa, ya, za, x2d, y2d);
 
 		return Jarvis.convexHull(x2d, y2d);
 	}
@@ -687,7 +792,7 @@ public class Perspective
 		int[] y2d = new int[m.getVerticesCount()];
 		final int[] faceColors3 = m.getFaceColors3();
 
-		Perspective.modelToCanvas(client,
+		Perspective.modelToCanvasCpu(client,
 			m.getVerticesCount(),
 			x, y, z,
 			jauOrient,
@@ -697,9 +802,9 @@ public class Perspective
 		final int radius = 5;
 
 		int[][] tris = new int[][]{
-			m.getTrianglesX(),
-			m.getTrianglesY(),
-			m.getTrianglesZ()
+			m.getFaceIndices1(),
+			m.getFaceIndices2(),
+			m.getFaceIndices3()
 		};
 
 		int vpX1 = client.getViewportXOffset();
@@ -707,10 +812,10 @@ public class Perspective
 		int vpX2 = vpX1 + client.getViewportWidth();
 		int vpY2 = vpY1 + client.getViewportHeight();
 
-		List<RectangleUnion.Rectangle> rects = new ArrayList<>(m.getTrianglesCount());
+		List<RectangleUnion.Rectangle> rects = new ArrayList<>(m.getFaceCount());
 
 		nextTri:
-		for (int tri = 0; tri < m.getTrianglesCount(); tri++)
+		for (int tri = 0; tri < m.getFaceCount(); tri++)
 		{
 			if (faceColors3[tri] == -2)
 			{

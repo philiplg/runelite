@@ -26,9 +26,14 @@ package net.runelite.rs.api;
 
 import java.math.BigInteger;
 import java.util.Map;
+import net.runelite.api.AmbientSoundEffect;
 import net.runelite.api.Client;
+import net.runelite.api.Deque;
+import net.runelite.api.ModelData;
 import net.runelite.api.SpritePixels;
 import net.runelite.api.World;
+import net.runelite.api.clan.ClanRank;
+import net.runelite.api.clan.ClanSettings;
 import net.runelite.api.widgets.Widget;
 import net.runelite.mapping.Construct;
 import net.runelite.mapping.Import;
@@ -84,6 +89,10 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("camAngleY")
 	@Override
 	int getMapAngle();
+
+	@Import("camAngleY")
+	@Override
+	void setCameraYawTarget(int cameraYawTarget);
 
 	@Import("Tiles_heights")
 	@Override
@@ -185,6 +194,10 @@ public interface RSClient extends RSGameEngine, Client
 	@Override
 	void setDraggedOnWidget(Widget widget);
 
+	@Import("widgetDragDuration")
+	@Override
+	int getDragTime();
+
 	@Import("Widget_interfaceComponents")
 	RSWidget[][] getWidgets();
 
@@ -238,6 +251,9 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("combatTargetPlayerIndex")
 	void setLocalInteractingIndex(int idx);
 
+	@Import("Scene_tilesDeque")
+	RSNodeDeque getTilesDeque();
+
 	@Import("groundItems")
 	RSNodeDeque[][][] getGroundItemDeque();
 
@@ -246,6 +262,14 @@ public interface RSClient extends RSGameEngine, Client
 
 	@Import("graphicsObjects")
 	RSNodeDeque getGraphicsObjectDeque();
+
+	@Import("worldSelectOpen")
+	@Override
+	boolean isWorldSelectOpen();
+
+	@Import("worldSelectOpen")
+	@Override
+	void setWorldSelectOpen(boolean open);
 
 	@Import("Login_username")
 	@Override
@@ -262,6 +286,9 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("otp")
 	@Override
 	void setOtp(String otp);
+
+	@Import("xPadding")
+	int getLoginScreenXPadding();
 
 	@Import("currentLoginField")
 	@Override
@@ -308,6 +335,9 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("menuOptionsCount")
 	@Override
 	void setMenuOptionCount(int menuOptionCount);
+
+	@Import("tempMenuAction")
+	RSMenuAction getTempMenuAction();
 
 	@Import("menuActions")
 	String[] getMenuOptions();
@@ -528,14 +558,6 @@ public interface RSClient extends RSGameEngine, Client
 	@Override
 	int[][] getXteaKeys();
 
-	@Import("gameDrawingMode")
-	@Override
-	int getGameDrawingMode();
-
-	@Import("gameDrawingMode")
-	@Override
-	void setGameDrawingMode(int gameDrawingMode);
-
 	@Import("cycleCntr")
 	int getCycleCntr();
 
@@ -547,7 +569,7 @@ public interface RSClient extends RSGameEngine, Client
 	 * parentId -1, which are the widget roots.
 	 */
 	@Import("rootInterface")
-	int getWidgetRoot();
+	int getTopLevelInterfaceId();
 
 	@Import("WorldMapElement_cached")
 	@Override
@@ -621,6 +643,18 @@ public interface RSClient extends RSGameEngine, Client
 	@Override
 	void setMouseIdleTicks(int cycles);
 
+	@Import("MouseHandler_lastPressedX")
+	int getMouseLastPressedX();
+
+	@Import("MouseHandler_lastPressedX")
+	void setMouseLastPressedX(int x);
+
+	@Import("MouseHandler_lastPressedY")
+	int getMouseLastPressedY();
+
+	@Import("MouseHandler_lastPressedY")
+	void setMouseLastPressedY(int y);
+
 	@Import("MouseHandler_lastPressedTimeMillis")
 	@Override
 	long getMouseLastPressedMillis();
@@ -636,6 +670,9 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("KeyHandler_pressedKeys")
 	@Override
 	boolean[] getPressedKeys();
+
+	@Import("isLowDetail")
+	boolean isLowMemory();
 
 	@Import("isLowDetail")
 	void setLowMemory(boolean lowMemory);
@@ -676,8 +713,8 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("friendSystem")
 	RSFriendSystem getFriendManager();
 
-	@Import("clanChat")
-	RSClanChat getFriendsChatManager();
+	@Import("friendsChat")
+	RSFriendsChat getFriendsChatManager();
 
 	@Import("loginType")
 	RSLoginType getLoginType();
@@ -872,6 +909,14 @@ public interface RSClient extends RSGameEngine, Client
 	@Override
 	int getOculusOrbFocalPointY();
 
+	@Import("oculusOrbFocalPointX")
+	@Override
+	void setOculusOrbFocalPointX(int state);
+
+	@Import("oculusOrbFocalPointY")
+	@Override
+	void setOculusOrbFocalPointY(int state);
+
 	RSTileItem getLastItemDespawn();
 
 	void setLastItemDespawn(RSTileItem lastItemDespawn);
@@ -908,7 +953,7 @@ public interface RSClient extends RSGameEngine, Client
 	int[][] getOccupiedTilesTick();
 
 	@Import("ObjectDefinition_cachedModels")
-	RSEvictingDualNodeHashTable getCachedModels2();
+	RSEvictingDualNodeHashTable getObjectDefinitionModelsCache();
 
 	@Import("Scene_drawnCount")
 	int getCycle();
@@ -939,6 +984,9 @@ public interface RSClient extends RSGameEngine, Client
 
 	@Import("Scene_plane")
 	void setScenePlane(int scenePlane);
+
+	@Import("Scene_plane")
+	int getScenePlane();
 
 	@Import("Scene_cameraXTileMin")
 	void setMinTileX(int i);
@@ -1081,6 +1129,10 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("selectedSpellFlags")
 	int getSelectedSpellFlags();
 
+	@Override
+	@Import("selectedSpellFlags")
+	void setSelectedSpellFlags(int var0);
+
 	@Import("isSpellSelected")
 	boolean getSpellSelected();
 
@@ -1119,6 +1171,8 @@ public interface RSClient extends RSGameEngine, Client
 
 	void setModulus(BigInteger modulus);
 
+	BigInteger getModulus();
+
 	@Import("ItemDefinition_fileCount")
 	int getItemCount();
 
@@ -1138,6 +1192,10 @@ public interface RSClient extends RSGameEngine, Client
 	@Override
 	void setSelectedItemSlot(int index);
 
+	@Import("selectedItemSlot")
+	@Override
+	int getSelectedItemIndex();
+
 	@Import("selectedItemWidget")
 	@Override
 	int getSelectedItemWidget();
@@ -1154,13 +1212,21 @@ public interface RSClient extends RSGameEngine, Client
 	@Override
 	int getSelectedSpellChildIndex();
 
-	@Import("selectedSpellWidget")
-	@Override
-	void setSelectedSpellWidget(int widgetID);
-
 	@Import("selectedSpellChildIndex")
 	@Override
 	void setSelectedSpellChildIndex(int index);
+
+	@Import("selectedSpellItemId")
+	@Override
+	int getSelectedSpellItemId();
+
+	@Import("selectedSpellItemId")
+	@Override
+	void setSelectedSpellItemId(int itemId);
+
+	@Import("selectedSpellWidget")
+	@Override
+	void setSelectedSpellWidget(int widgetID);
 
 	@Import("Sprite_drawScaled")
 	@Override
@@ -1174,6 +1240,9 @@ public interface RSClient extends RSGameEngine, Client
 
 	@Import("VarpDefinition_get")
 	RSVarpDefinition getVarpDefinition(int id);
+
+	@Construct
+	RSFloorOverlayDefinition newFloorOverlayDefinition();
 
 	@Construct
 	RSTileItem newTileItem();
@@ -1287,11 +1356,21 @@ public interface RSClient extends RSGameEngine, Client
 	int isItemSelected();
 
 	@Override
+	@Import("isItemSelected")
+	int getSelectedItem();
+
+	@Override
 	@Import("selectedItemName")
 	String getSelectedItemName();
 
 	@Import("meslayerContinueWidget")
 	Widget getMessageContinueWidget();
+
+	@Import("playingJingle")
+	boolean isPlayingJingle();
+
+	@Import("musicTrackGroupId")
+	int getMusicCurrentTrackId();
 
 	@Import("musicPlayerStatus")
 	void setMusicPlayerStatus(int var0);
@@ -1412,4 +1491,160 @@ public interface RSClient extends RSGameEngine, Client
 
 	@Import("crossWorldMessageIdsIndex")
 	int getCrossWorldMessageIdsIndex();
+
+	@Import("currentClanChannels")
+	RSClanChannel[] getCurrentClanChannels();
+
+	@Import("currentClanSettings")
+	RSClanSettings[] getCurrentClanSettingsAry();
+
+	@Import("guestClanChannel")
+	@Override
+	RSClanChannel getGuestClanChannel();
+
+	@Import("guestClanSettings")
+	@Override
+	RSClanSettings getGuestClanSettings();
+
+	ClanRank getClanRankFromRs(int rank);
+
+	@Import("readStringIntParameters")
+	RSIterableNodeHashTable readStringIntParameters(RSBuffer buffer, RSIterableNodeHashTable table);
+
+	@Import("rndHue")
+	int getRndHue();
+
+	@Import("Tiles_underlays")
+	byte[][][] getTileUnderlays();
+
+	@Import("Tiles_overlays")
+	byte[][][] getTileOverlays();
+
+	@Import("Tiles_shapes")
+	byte[][][] getTileShapes();
+
+	@Import("SpotAnimationDefinition_get")
+	RSSpotAnimationDefinition getSpotAnimationDefinition(int id);
+
+	@Import("ModelData_get")
+	RSModelData getModelData(RSAbstractArchive var0, int var1, int var2);
+
+	@Import("isCameraLocked")
+	boolean isCameraLocked();
+
+	boolean getCameraPitchRelaxerEnabled();
+
+	boolean isUnlockedFps();
+
+	long getUnlockedFpsTarget();
+
+	void posToCameraAngle(int var0, int var1);
+
+	@Import("objectSounds")
+	Deque<AmbientSoundEffect> getAmbientSoundEffects();
+
+	@Import("EnumDefinition_cached")
+	RSEvictingDualNodeHashTable getEnumDefinitionCache();
+
+	@Import("FloorUnderlayDefinition_cached")
+	RSEvictingDualNodeHashTable getFloorUnderlayDefinitionCache();
+
+	@Import("FloorOverlayDefinition_archive")
+	RSAbstractArchive getFloorOverlayDefinitionArchive();
+
+	@Import("FloorOverlayDefinition_cached")
+	RSEvictingDualNodeHashTable getFloorOverlayDefinitionCache();
+
+	@Import("HitSplatDefinition_cached")
+	RSEvictingDualNodeHashTable getHitSplatDefinitionCache();
+
+	@Import("HitSplatDefinition_cachedSprites")
+	RSEvictingDualNodeHashTable getHitSplatDefinitionSpritesCache();
+
+	@Import("HitSplatDefinition_cachedFonts")
+	RSEvictingDualNodeHashTable getHitSplatDefinitionDontsCache();
+
+	@Import("InvDefinition_cached")
+	RSEvictingDualNodeHashTable getInvDefinitionCache();
+
+	@Import("ItemDefinition_cachedModels")
+	RSEvictingDualNodeHashTable getItemDefinitionModelsCache();
+
+	@Import("ItemDefinition_cachedSprites")
+	RSEvictingDualNodeHashTable getItemDefinitionSpritesCache();
+
+	@Import("KitDefinition_cached")
+	RSEvictingDualNodeHashTable getKitDefinitionCache();
+
+	@Import("NpcDefinition_cached")
+	RSEvictingDualNodeHashTable getNpcDefinitionCache();
+
+	@Import("NpcDefinition_cachedModels")
+	RSEvictingDualNodeHashTable getNpcDefinitionModelsCache();
+
+	@Import("ObjectDefinition_cached")
+	RSEvictingDualNodeHashTable getObjectDefinitionCache();
+
+	@Import("ObjectDefinition_cached")
+	RSEvictingDualNodeHashTable getObjectCompositionCache();
+
+	@Import("ObjectDefinition_cachedModelData")
+	RSEvictingDualNodeHashTable getObjectDefinitionModelDataCache();
+
+	@Import("ObjectDefinition_cachedEntities")
+	RSEvictingDualNodeHashTable getObjectDefinitionEntitiesCache();
+
+	@Import("ParamDefinition_cached")
+	RSEvictingDualNodeHashTable getParamDefinitionCache();
+
+	@Import("PlayerAppearance_cachedModels")
+	RSEvictingDualNodeHashTable getPlayerAppearanceModelsCache();
+
+	@Import("SequenceDefinition_cached")
+	RSEvictingDualNodeHashTable getSequenceDefinitionCache();
+
+	@Import("SequenceDefinition_cachedFrames")
+	RSEvictingDualNodeHashTable getSequenceDefinitionFramesCache();
+
+	@Import("SequenceDefinition_cachedModel")
+	RSEvictingDualNodeHashTable getSequenceDefinitionModelsCache();
+
+	@Import("SpotAnimationDefinition_cached")
+	RSEvictingDualNodeHashTable getSpotAnimationDefinitionCache();
+
+	@Import("SpotAnimationDefinition_cachedModels")
+	RSEvictingDualNodeHashTable getSpotAnimationDefinitionModlesCache();
+
+	@Import("VarcInt_cached")
+	RSEvictingDualNodeHashTable getVarcIntCache();
+
+	@Import("VarpDefinition_cached")
+	RSEvictingDualNodeHashTable getVarpDefinitionCache();
+
+	@Import("Widget_cachedModels")
+	RSEvictingDualNodeHashTable getModelsCache();
+
+	@Import("Widget_cachedFonts")
+	RSEvictingDualNodeHashTable getFontsCache();
+
+	@Import("Widget_cachedSpriteMasks")
+	RSEvictingDualNodeHashTable getSpriteMasksCache();
+
+	@Import("WorldMapElement_cachedSprites")
+	RSEvictingDualNodeHashTable getSpritesCache();
+
+	@Construct
+	RSIterableNodeHashTable createIterableNodeHashTable(int size);
+
+	@Construct
+	RSRuneLiteClanMember runeliteClanMember(ClanSettings var1, int var2);
+
+	@Construct
+	RSProjectile newProjectile(int var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8, int var9, int var10, int var11);
+
+	@Construct
+	RSModelData newModelData(ModelData[] var1, int var2);
+
+	@Construct
+	RSEvictingDualNodeHashTable newEvictingDualNodeHashTable(int var1);
 }

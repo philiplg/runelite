@@ -4,60 +4,60 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("gs")
+@ObfuscatedName("hc")
 @Implements("BoundaryObject")
 public final class BoundaryObject {
-	@ObfuscatedName("f")
-	@ObfuscatedGetter(
-		intValue = 1487980993
-	)
-	@Export("tileHeight")
-	int tileHeight;
 	@ObfuscatedName("o")
 	@ObfuscatedGetter(
-		intValue = -2109183059
+		intValue = 1657313425
+	)
+	@Export("z")
+	int z;
+	@ObfuscatedName("q")
+	@ObfuscatedGetter(
+		intValue = -1880399519
 	)
 	@Export("x")
 	int x;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 184751419
+		intValue = -1024241781
 	)
 	@Export("y")
 	int y;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -1907463847
+		intValue = 291661833
 	)
 	@Export("orientationA")
 	int orientationA;
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@ObfuscatedGetter(
-		intValue = 334995477
+		intValue = -40246503
 	)
 	@Export("orientationB")
 	int orientationB;
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@ObfuscatedSignature(
-		descriptor = "Lfm;"
+		descriptor = "Lgx;"
 	)
 	@Export("renderable1")
 	public Renderable renderable1;
-	@ObfuscatedName("k")
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		descriptor = "Lfm;"
+		descriptor = "Lgx;"
 	)
 	@Export("renderable2")
 	public Renderable renderable2;
-	@ObfuscatedName("g")
+	@ObfuscatedName("s")
 	@ObfuscatedGetter(
-		longValue = 4648548109869818167L
+		longValue = 5476522096528305987L
 	)
 	@Export("tag")
 	public long tag;
-	@ObfuscatedName("h")
+	@ObfuscatedName("r")
 	@ObfuscatedGetter(
-		intValue = 512629061
+		intValue = -214248861
 	)
 	@Export("flags")
 	int flags;
@@ -66,36 +66,4 @@ public final class BoundaryObject {
 		this.tag = 0L; // L: 11
 		this.flags = 0; // L: 12
 	} // L: 14
-
-	@ObfuscatedName("fg")
-	@ObfuscatedSignature(
-		descriptor = "(B)V",
-		garbageValue = "77"
-	)
-	@Export("playPcmPlayers")
-	static final void playPcmPlayers() {
-		if (class43.pcmPlayer1 != null) { // L: 3059
-			class43.pcmPlayer1.run();
-		}
-
-		if (ApproximateRouteStrategy.pcmPlayer0 != null) { // L: 3060
-			ApproximateRouteStrategy.pcmPlayer0.run();
-		}
-
-	} // L: 3061
-
-	@ObfuscatedName("jk")
-	@ObfuscatedSignature(
-		descriptor = "(II)Z",
-		garbageValue = "-230387884"
-	)
-	static boolean method3787(int var0) {
-		for (int var1 = 0; var1 < Client.field827; ++var1) { // L: 10872
-			if (Client.field792[var1] == var0) { // L: 10873
-				return true;
-			}
-		}
-
-		return false; // L: 10875
-	}
 }

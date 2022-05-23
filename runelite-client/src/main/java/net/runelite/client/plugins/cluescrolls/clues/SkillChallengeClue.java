@@ -24,12 +24,11 @@
  */
 package net.runelite.client.plugins.cluescrolls.clues;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -124,7 +123,12 @@ public class SkillChallengeClue extends ClueScroll implements NpcClueScroll, Nam
 		item(ItemID.CRYSTAL_HARPOON_INACTIVE)
 	);
 
-	private static final Set<SkillChallengeClue> CLUES = ImmutableSet.of(
+	private static final AnyRequirementCollection ANY_HAMMER = any("Hammer",
+		item(ItemID.HAMMER),
+		item(ItemID.IMCANDO_HAMMER)
+	);
+
+	private static final List<SkillChallengeClue> CLUES = ImmutableList.of(
 		// Charlie Tasks
 		new SkillChallengeClue("Cook a Pike", "i need to cook charlie a pike.", "i need to take the cooked pike to charlie.", item(ItemID.PIKE), item(ItemID.RAW_PIKE)),
 		new SkillChallengeClue("Cook a Trout", "i need to cook charlie a trout.", "i need to take the cooked trout to charlie.", item(ItemID.TROUT), item(ItemID.RAW_TROUT)),
@@ -133,27 +137,62 @@ public class SkillChallengeClue extends ClueScroll implements NpcClueScroll, Nam
 		new SkillChallengeClue("Fish a Herring", "i need to fish charlie a herring.", "i need to take a raw herring to charlie.", item(ItemID.RAW_HERRING), any("Fishing rod", item(ItemID.FISHING_ROD), item(ItemID.PEARL_FISHING_ROD)), item(ItemID.FISHING_BAIT)),
 		new SkillChallengeClue("Fish a Trout", "i need to fish charlie a trout.", "i need to take a raw trout to charlie.", item(ItemID.RAW_TROUT), any("Fly fishing rod", item(ItemID.FLY_FISHING_ROD), item(ItemID.PEARL_FLY_FISHING_ROD)), item(ItemID.FEATHER)),
 		new SkillChallengeClue("Mine a piece of Iron Ore", "i need to mine charlie a piece of iron ore from an iron vein.", "i need to take the iron ore to charlie.", item(ItemID.IRON_ORE), ANY_PICKAXE),
-		new SkillChallengeClue("Smith an Iron Dagger", "i need to smith charlie one iron dagger.", "i need to take the iron dagger i smithed to charlie.", item(ItemID.IRON_DAGGER), item(ItemID.IRON_BAR), item(ItemID.HAMMER)),
+		new SkillChallengeClue("Smith an Iron Dagger", "i need to smith charlie one iron dagger.", "i need to take the iron dagger i smithed to charlie.", item(ItemID.IRON_DAGGER), item(ItemID.IRON_BAR), ANY_HAMMER),
 		// Elite Sherlock Tasks
 		new SkillChallengeClue("Equip a Dragon Scimitar.", true, any("Any Dragon Scimitar", item(ItemID.DRAGON_SCIMITAR), item(ItemID.DRAGON_SCIMITAR_OR))),
 		new SkillChallengeClue("Enchant some Dragonstone Jewellery.", "enchant a piece of dragonstone jewellery.",
 			xOfItem(ItemID.COSMIC_RUNE, 1),
-			any("Water Rune x15", xOfItem(ItemID.WATER_RUNE, 15), xOfItem(ItemID.MIST_RUNE, 15), xOfItem(ItemID.MUD_RUNE, 15), xOfItem(ItemID.STEAM_RUNE, 15), item(ItemID.STAFF_OF_WATER), item(ItemID.WATER_BATTLESTAFF), item(ItemID.MYSTIC_WATER_STAFF), item(ItemID.MUD_BATTLESTAFF), item(ItemID.MYSTIC_MUD_STAFF), item(ItemID.MIST_BATTLESTAFF), item(ItemID.MYSTIC_MIST_STAFF), item(ItemID.STEAM_BATTLESTAFF), item(ItemID.MYSTIC_STEAM_STAFF), item(ItemID.STEAM_BATTLESTAFF_12795), item(ItemID.MYSTIC_STEAM_STAFF_12796), item(ItemID.KODAI_WAND)),
+			any("Water Rune x15", xOfItem(ItemID.WATER_RUNE, 15), xOfItem(ItemID.MIST_RUNE, 15), xOfItem(ItemID.MUD_RUNE, 15), xOfItem(ItemID.STEAM_RUNE, 15), item(ItemID.STAFF_OF_WATER), item(ItemID.WATER_BATTLESTAFF), item(ItemID.MYSTIC_WATER_STAFF), item(ItemID.MUD_BATTLESTAFF), item(ItemID.MYSTIC_MUD_STAFF), item(ItemID.MIST_BATTLESTAFF), item(ItemID.MYSTIC_MIST_STAFF), item(ItemID.STEAM_BATTLESTAFF), item(ItemID.MYSTIC_STEAM_STAFF), item(ItemID.STEAM_BATTLESTAFF_12795), item(ItemID.MYSTIC_STEAM_STAFF_12796), item(ItemID.KODAI_WAND), item(ItemID.TOME_OF_WATER)),
 			any("Earth Rune x15", xOfItem(ItemID.EARTH_RUNE, 15), xOfItem(ItemID.DUST_RUNE, 15), xOfItem(ItemID.MUD_RUNE, 15), xOfItem(ItemID.LAVA_RUNE, 15), item(ItemID.STAFF_OF_EARTH), item(ItemID.EARTH_BATTLESTAFF), item(ItemID.MYSTIC_EARTH_STAFF), item(ItemID.MUD_BATTLESTAFF), item(ItemID.MYSTIC_MUD_STAFF), item(ItemID.DUST_BATTLESTAFF), item(ItemID.MYSTIC_DUST_STAFF), item(ItemID.LAVA_BATTLESTAFF), item(ItemID.MYSTIC_LAVA_STAFF), item(ItemID.LAVA_BATTLESTAFF_21198), item(ItemID.MYSTIC_LAVA_STAFF_21200)),
 			any("Unenchanted Dragonstone Jewellery", item(ItemID.DRAGONSTONE_RING), item(ItemID.DRAGON_NECKLACE), item(ItemID.DRAGONSTONE_BRACELET), item(ItemID.DRAGONSTONE_AMULET))),
 		new SkillChallengeClue("Craft a nature rune.", item(ItemID.PURE_ESSENCE)),
-		new SkillChallengeClue("Catch a mottled eel with aerial fishing in Lake Molch.", any("Fish chunks or King worms", item(ItemID.FISH_CHUNKS), item(ItemID.KING_WORM)), emptySlot("No Gloves", EquipmentInventorySlot.GLOVES), emptySlot("No Weapon",  EquipmentInventorySlot.WEAPON), emptySlot("No Shield", EquipmentInventorySlot.SHIELD)),
+		new SkillChallengeClue("Catch a mottled eel with aerial fishing in Lake Molch.", any("Fish chunks or King worms", item(ItemID.FISH_CHUNKS), item(ItemID.KING_WORM)), emptySlot("No Gloves", EquipmentInventorySlot.GLOVES), any("No Weapon", emptySlot("",  EquipmentInventorySlot.WEAPON), item(ItemID.CORMORANTS_GLOVE), item(ItemID.CORMORANTS_GLOVE_22817)), emptySlot("No Shield", EquipmentInventorySlot.SHIELD)),
 		new SkillChallengeClue("Score a goal in skullball.", true, any("Ring of Charos", item(ItemID.RING_OF_CHAROS), item(ItemID.RING_OF_CHAROSA))),
 		new SkillChallengeClue("Complete a lap of Ape atoll agility course.", true, any("Ninja Monkey Greegree", item(ItemID.NINJA_MONKEY_GREEGREE), item(ItemID.NINJA_MONKEY_GREEGREE_4025), item(ItemID.KRUK_MONKEY_GREEGREE))),
 		new SkillChallengeClue("Create a super defence potion.", item(ItemID.CADANTINE_POTION_UNF), item(ItemID.WHITE_BERRIES)),
 		new SkillChallengeClue("Steal from a chest in Ardougne Castle."),
 		new SkillChallengeClue("Craft a green dragonhide body.", xOfItem(ItemID.GREEN_DRAGON_LEATHER, 3), item(ItemID.NEEDLE), item(ItemID.THREAD)),
 		new SkillChallengeClue("String a yew longbow.", item(ItemID.YEW_LONGBOW_U), item(ItemID.BOW_STRING)),
-		new SkillChallengeClue("Kill a Dust Devil.", "slay a dust devil.", true, any("Facemask or Slayer Helmet", item(ItemID.FACEMASK), item(ItemID.SLAYER_HELMET), item(ItemID. SLAYER_HELMET_I), item(ItemID. BLACK_SLAYER_HELMET), item(ItemID. BLACK_SLAYER_HELMET_I), item(ItemID. PURPLE_SLAYER_HELMET), item(ItemID. PURPLE_SLAYER_HELMET_I), item(ItemID. RED_SLAYER_HELMET), item(ItemID. RED_SLAYER_HELMET_I), item(ItemID.GREEN_SLAYER_HELMET), item(ItemID. GREEN_SLAYER_HELMET_I), item(ItemID. TURQUOISE_SLAYER_HELMET), item(ItemID. TURQUOISE_SLAYER_HELMET_I), item(ItemID. HYDRA_SLAYER_HELMET), item(ItemID. HYDRA_SLAYER_HELMET_I), item(ItemID.TWISTED_SLAYER_HELMET), item(ItemID.TWISTED_SLAYER_HELMET_I), item(ItemID.SLAYER_HELMET_I_25177), item(ItemID.BLACK_SLAYER_HELMET_I_25179), item(ItemID.GREEN_SLAYER_HELMET_I_25181), item(ItemID.RED_SLAYER_HELMET_I_25183), item(ItemID.PURPLE_SLAYER_HELMET_I_25185), item(ItemID.TURQUOISE_SLAYER_HELMET_I_25187), item(ItemID.HYDRA_SLAYER_HELMET_I_25189), item(ItemID.TWISTED_SLAYER_HELMET_I_25191))),
+		new SkillChallengeClue("Kill a Dust Devil.", "slay a dust devil.", true,
+			any("Facemask or Slayer Helmet",
+				item(ItemID.FACEMASK),
+				item(ItemID.SLAYER_HELMET),
+				item(ItemID.SLAYER_HELMET_I),
+				item(ItemID.BLACK_SLAYER_HELMET),
+				item(ItemID.BLACK_SLAYER_HELMET_I),
+				item(ItemID.PURPLE_SLAYER_HELMET),
+				item(ItemID.PURPLE_SLAYER_HELMET_I),
+				item(ItemID.RED_SLAYER_HELMET),
+				item(ItemID.RED_SLAYER_HELMET_I),
+				item(ItemID.GREEN_SLAYER_HELMET),
+				item(ItemID.GREEN_SLAYER_HELMET_I),
+				item(ItemID.TURQUOISE_SLAYER_HELMET),
+				item(ItemID.TURQUOISE_SLAYER_HELMET_I),
+				item(ItemID.HYDRA_SLAYER_HELMET),
+				item(ItemID.HYDRA_SLAYER_HELMET_I),
+				item(ItemID.TWISTED_SLAYER_HELMET),
+				item(ItemID.TWISTED_SLAYER_HELMET_I),
+				item(ItemID.TZTOK_SLAYER_HELMET),
+				item(ItemID.TZTOK_SLAYER_HELMET_I),
+				item(ItemID.VAMPYRIC_SLAYER_HELMET),
+				item(ItemID.VAMPYRIC_SLAYER_HELMET_I),
+				item(ItemID.TZKAL_SLAYER_HELMET),
+				item(ItemID.TZKAL_SLAYER_HELMET_I),
+				item(ItemID.SLAYER_HELMET_I_25177),
+				item(ItemID.BLACK_SLAYER_HELMET_I_25179),
+				item(ItemID.GREEN_SLAYER_HELMET_I_25181),
+				item(ItemID.RED_SLAYER_HELMET_I_25183),
+				item(ItemID.PURPLE_SLAYER_HELMET_I_25185),
+				item(ItemID.TURQUOISE_SLAYER_HELMET_I_25187),
+				item(ItemID.HYDRA_SLAYER_HELMET_I_25189),
+				item(ItemID.TWISTED_SLAYER_HELMET_I_25191),
+				item(ItemID.TZTOK_SLAYER_HELMET_I_25902),
+				item(ItemID.VAMPYRIC_SLAYER_HELMET_I_25908),
+				item(ItemID.TZKAL_SLAYER_HELMET_I_25914))),
 		new SkillChallengeClue("Catch a black warlock.", item(ItemID.BUTTERFLY_JAR), any("Butterfly Net", item(ItemID.BUTTERFLY_NET), item(ItemID.MAGIC_BUTTERFLY_NET))),
 		new SkillChallengeClue("Catch a red chinchompa.", item(ItemID.BOX_TRAP)),
 		new SkillChallengeClue("Mine a mithril ore.", ANY_PICKAXE),
-		new SkillChallengeClue("Smith a mithril 2h sword.", item(ItemID.HAMMER), xOfItem(ItemID.MITHRIL_BAR, 3)),
+		new SkillChallengeClue("Smith a mithril 2h sword.", ANY_HAMMER, xOfItem(ItemID.MITHRIL_BAR, 3)),
 		new SkillChallengeClue("Catch a raw shark.", ANY_HARPOON),
 		new SkillChallengeClue("Cut a yew log.", ANY_AXE),
 		new SkillChallengeClue("Fix a magical lamp in Dorgesh-Kaan.", new String[] { "Broken lamp" }, new int[] { 10834, 10835 }, item(ItemID.LIGHT_ORB)),
@@ -164,8 +203,8 @@ public class SkillChallengeClue extends ClueScroll implements NpcClueScroll, Nam
 		new SkillChallengeClue("Activate the Chivalry prayer."),
 		new SkillChallengeClue("Hand in a Tier 2 or higher set of Shayzien supply armour. (Requires 11 lovakite bars)", "take the lovakengj armourers a boxed set of shayzien supply armour at tier 2 or above.", any("Shayzien Supply Set (Tier 2 or higher)", item(ItemID.SHAYZIEN_SUPPLY_SET_2), item(ItemID.SHAYZIEN_SUPPLY_SET_3), item(ItemID.SHAYZIEN_SUPPLY_SET_4), item(ItemID.SHAYZIEN_SUPPLY_SET_5))),
 		// Master Sherlock Tasks
-		new SkillChallengeClue("Equip an abyssal whip in front of the abyssal demons of the Slayer Tower.", true, any("Abyssal Whip", item(ItemID.ABYSSAL_WHIP), item(ItemID.FROZEN_ABYSSAL_WHIP), item(ItemID.VOLCANIC_ABYSSAL_WHIP))),
-		new SkillChallengeClue("Smith a runite med helm.", item(ItemID.HAMMER), item(ItemID.RUNITE_BAR)),
+		new SkillChallengeClue("Equip an abyssal whip in front of the abyssal demons of the Slayer Tower.", true, any("Abyssal Whip", item(ItemID.ABYSSAL_WHIP), item(ItemID.FROZEN_ABYSSAL_WHIP), item(ItemID.VOLCANIC_ABYSSAL_WHIP), item(ItemID.ABYSSAL_WHIP_OR))),
+		new SkillChallengeClue("Smith a runite med helm.", ANY_HAMMER, item(ItemID.RUNITE_BAR)),
 		new SkillChallengeClue("Teleport to a spirit tree you planted yourself."),
 		new SkillChallengeClue("Create a Barrows teleport tablet.", item(ItemID.DARK_ESSENCE_BLOCK), xOfItem(ItemID.BLOOD_RUNE, 1), xOfItem(ItemID.LAW_RUNE, 2), xOfItem(ItemID.SOUL_RUNE, 2)),
 		new SkillChallengeClue("Kill a Nechryael in the Slayer Tower.", "slay a nechryael in the slayer tower."),

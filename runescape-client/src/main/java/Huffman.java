@@ -3,22 +3,16 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("hx")
+@ObfuscatedName("jx")
 @Implements("Huffman")
 public class Huffman {
-	@ObfuscatedName("qz")
-	@ObfuscatedSignature(
-		descriptor = "Lak;"
-	)
-	@Export("pcmStreamMixer")
-	static PcmStreamMixer pcmStreamMixer;
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@Export("masks")
 	int[] masks;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@Export("bits")
 	byte[] bits;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@Export("keys")
 	int[] keys;
 
@@ -105,10 +99,10 @@ public class Huffman {
 
 	} // L: 60
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
 		descriptor = "([BII[BII)I",
-		garbageValue = "310251163"
+		garbageValue = "-1517056524"
 	)
 	@Export("compress")
 	int compress(byte[] var1, int var2, int var3, byte[] var4, int var5) {
@@ -126,7 +120,7 @@ public class Huffman {
 			int var11 = var7 >> 3; // L: 71
 			int var12 = var7 & 7; // L: 72
 			var6 &= -var12 >> 31; // L: 73
-			int var13 = (var10 + var12 - 1 >> 3) + var11; // L: 74
+			int var13 = (var12 + var10 - 1 >> 3) + var11; // L: 74
 			var12 += 24; // L: 76
 			var4[var11] = (byte)(var6 |= var9 >>> var12); // L: 77
 			if (var11 < var13) { // L: 78
@@ -156,10 +150,10 @@ public class Huffman {
 		return (var7 + 7 >> 3) - var5; // L: 97
 	}
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "([BI[BIIB)I",
-		garbageValue = "74"
+		descriptor = "([BI[BIII)I",
+		garbageValue = "-1136816719"
 	)
 	@Export("decompress")
 	int decompress(byte[] var1, int var2, byte[] var3, int var4, int var5) {
@@ -278,8 +272,8 @@ public class Huffman {
 					var6 = 0; // L: 155
 				}
 
-				if ((var8 & 1) != 0) { // L: 157
-					var6 = this.keys[var6];
+				if ((var8 & 1) != 0) {
+					var6 = this.keys[var6]; // L: 157
 				} else {
 					++var6; // L: 158
 				}
@@ -298,14 +292,5 @@ public class Huffman {
 
 			return var7 + 1 - var2; // L: 165
 		}
-	}
-
-	@ObfuscatedName("hw")
-	@ObfuscatedSignature(
-		descriptor = "(I)Z",
-		garbageValue = "-1260509455"
-	)
-	static final boolean method4311() {
-		return Client.isMenuOpen; // L: 7813
 	}
 }

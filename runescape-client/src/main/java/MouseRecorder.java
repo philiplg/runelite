@@ -1,31 +1,32 @@
+import java.io.IOException;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("cy")
+@ObfuscatedName("cv")
 @Implements("MouseRecorder")
 public class MouseRecorder implements Runnable {
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@Export("isRunning")
 	boolean isRunning;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@Export("lock")
 	Object lock;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = 1900578569
+		intValue = 1556283769
 	)
 	@Export("index")
 	int index;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@Export("xs")
 	int[] xs;
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@Export("ys")
 	int[] ys;
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@Export("millis")
 	long[] millis;
 
@@ -39,65 +40,41 @@ public class MouseRecorder implements Runnable {
 	} // L: 14
 
 	public void run() {
-		for (; this.isRunning; GrandExchangeEvent.sleepExact(50L)) { // L: 17 26
-			synchronized(this.lock) { // L: 18
-				if (this.index < 500) { // L: 19
-					this.xs[this.index] = MouseHandler.MouseHandler_x; // L: 20
-					this.ys[this.index] = MouseHandler.MouseHandler_y; // L: 21
-					this.millis[this.index] = MouseHandler.MouseHandler_millis; // L: 22
-					++this.index; // L: 23
+		for (; this.isRunning; class241.method4815(50L)) { // L: 18 27
+			synchronized(this.lock) { // L: 19
+				if (this.index < 500) { // L: 20
+					this.xs[this.index] = MouseHandler.MouseHandler_x; // L: 21
+					this.ys[this.index] = MouseHandler.MouseHandler_y; // L: 22
+					this.millis[this.index] = MouseHandler.MouseHandler_millis; // L: 23
+					++this.index; // L: 24
 				}
 			}
 		}
 
-	} // L: 28
+	} // L: 29
 
 	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "([BIIII[Lel;I)V",
-		garbageValue = "90989095"
+		descriptor = "(ZB)V",
+		garbageValue = "-105"
 	)
-	static final void method2108(byte[] var0, int var1, int var2, int var3, int var4, CollisionMap[] var5) {
-		int var7;
-		int var8;
-		for (int var6 = 0; var6 < 4; ++var6) { // L: 63
-			for (var7 = 0; var7 < 64; ++var7) { // L: 64
-				for (var8 = 0; var8 < 64; ++var8) { // L: 65
-					if (var7 + var1 > 0 && var7 + var1 < 103 && var8 + var2 > 0 && var8 + var2 < 103) { // L: 66
-						int[] var10000 = var5[var6].flags[var7 + var1];
-						var10000[var2 + var8] &= -16777217;
-					}
+	public static void method2088(boolean var0) {
+		if (NetCache.NetCache_socket != null) { // L: 42
+			try {
+				Buffer var1 = new Buffer(4); // L: 44
+				var1.writeByte(var0 ? 2 : 3); // L: 45
+				var1.writeMedium(0); // L: 46
+				NetCache.NetCache_socket.write(var1.array, 0, 4); // L: 47
+			} catch (IOException var4) {
+				try {
+					NetCache.NetCache_socket.close(); // L: 51
+				} catch (Exception var3) { // L: 53
 				}
+
+				++NetCache.NetCache_ioExceptions; // L: 54
+				NetCache.NetCache_socket = null; // L: 55
 			}
+
 		}
-
-		Buffer var10 = new Buffer(var0); // L: 70
-
-		for (var7 = 0; var7 < 4; ++var7) { // L: 71
-			for (var8 = 0; var8 < 64; ++var8) {
-				for (int var9 = 0; var9 < 64; ++var9) { // L: 73
-					WorldMapData_1.loadTerrain(var10, var7, var8 + var1, var9 + var2, var3, var4, 0); // L: 74
-				}
-			}
-		}
-
-	} // L: 78
-
-	@ObfuscatedName("b")
-	@ObfuscatedSignature(
-		descriptor = "(I)I",
-		garbageValue = "1618150631"
-	)
-	public static int method2107() {
-		return ++MouseHandler.MouseHandler_idleCycles - 1; // L: 72
-	}
-
-	@ObfuscatedName("js")
-	static final void method2109(double var0) {
-		Rasterizer3D.Rasterizer3D_setBrightness(var0); // L: 11147
-		((TextureProvider)Rasterizer3D.Rasterizer3D_textureLoader).setBrightness(var0); // L: 11148
-		Clock.method2610(); // L: 11149
-		Login.clientPreferences.field1304 = var0; // L: 11150
-		Message.savePreferences(); // L: 11151
-	} // L: 11152
+	} // L: 57
 }

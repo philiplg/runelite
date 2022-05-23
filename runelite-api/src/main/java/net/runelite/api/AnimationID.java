@@ -179,7 +179,7 @@ public final class AnimationID
 	public static final int MAGIC_ENCHANTING_BOLTS = 4462;
 	public static final int BURYING_BONES = 827;
 	public static final int USING_GILDED_ALTAR = 3705;
-	public static final int LOOKING_INTO = 832;
+	public static final int LOOKING_INTO = 832; // Generic animation used for filling water vessels, Shades of Mort'ton, etc.
 	public static final int DIG = 830;
 	public static final int DEMONIC_GORILLA_MAGIC_ATTACK = 7225;
 	public static final int DEMONIC_GORILLA_MELEE_ATTACK = 7226;
@@ -204,9 +204,17 @@ public final class AnimationID
 	public static final int LEAGUE_HOME_TELEPORT_4 = 8803;
 	public static final int LEAGUE_HOME_TELEPORT_5 = 8805;
 	public static final int LEAGUE_HOME_TELEPORT_6 = 8807;
+	public static final int SHATTERED_LEAGUE_HOME_TELEPORT_1 = 9209;
+	public static final int SHATTERED_LEAGUE_HOME_TELEPORT_2 = 9210;
+	public static final int SHATTERED_LEAGUE_HOME_TELEPORT_3 = 9211;
+	public static final int SHATTERED_LEAGUE_HOME_TELEPORT_4 = 9212;
+	public static final int SHATTERED_LEAGUE_HOME_TELEPORT_5 = 9213;
+	public static final int SHATTERED_LEAGUE_HOME_TELEPORT_6 = 9214;
+	public static final int RAID_LIGHT_ANIMATION = 3101;
+	public static final int LOOTBEAM_ANIMATION = 9260;
 
 	public static final int CONSTRUCTION = 3676;
-	public static final int CONSTRUCTION_IMCANDO = 8192;
+	public static final int CONSTRUCTION_IMCANDO = 8912;
 	public static final int SAND_COLLECTION = 895;
 	public static final int PISCARILIUS_CRANE_REPAIR = 7199;
 	public static final int HOME_MAKE_TABLET = 4067;

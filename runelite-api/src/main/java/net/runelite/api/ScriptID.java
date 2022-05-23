@@ -40,12 +40,21 @@ public final class ScriptID
 	/**
 	 * Sends a chat message
 	 * <ul>
-	 * <li> int (byte) Flags </li>
 	 * <li> String Message to send </li>
+	 * <li> int modes </li>
+	 * <li> int (clan type) </li>
+	 * <li> int (boolean) use target</li>
+	 * <li> int set target </li>
 	 * </ul>
 	 */
-	@ScriptArguments(integer = 1, string = 1)
-	public static final int CHATBOX_INPUT = 96;
+	@ScriptArguments(integer = 4, string = 1)
+	public static final int CHAT_SEND = 5517;
+
+	/**
+	 * Rebuilds the chatbox and the pmbox
+	 */
+	@ScriptArguments()
+	public static final int SPLITPM_CHANGED = 83;
 
 	/**
 	 * Rebuilds the chatbox
@@ -78,9 +87,10 @@ public final class ScriptID
 	 * <ul>
 	 * <li> int (boolean) Clear the current text </li>
 	 * <li> int (boolean) Restore to chat view </li>
+	 * <li> int (boolean) Submit close to server </li>
 	 * </ul>
 	 */
-	@ScriptArguments(integer = 2)
+	@ScriptArguments(integer = 3)
 	public static final int MESSAGE_LAYER_CLOSE = 299;
 
 	/**
@@ -248,9 +258,15 @@ public final class ScriptID
 	public static final int FRIENDS_CHAT_CHANNEL_REBUILD = 1658;
 
 	/**
+	 * Builds the widget that holds all of the players inside a clan chat
+	 */
+	@ScriptArguments(integer = 7)
+	public static final int CLAN_SIDEPANEL_DRAW = 4396;
+
+	/**
 	 * Builds the widget for making an offer in Grand Exchange
 	 */
-	@ScriptArguments(integer = 15)
+	@ScriptArguments(integer = 16)
 	public static final int GE_OFFERS_SETUP_BUILD = 779;
 
 	/**
@@ -260,10 +276,10 @@ public final class ScriptID
 	public static final int GE_ITEM_SEARCH = 752;
 
 	/**
-	 * Builds the quest list inside the quest tab that shows each quest's progress
+	 * On load listener for building the quest list interface
 	 */
-	@ScriptArguments(integer = 3)
-	public static final int QUESTLIST_PROGRESS_LIST_SHOW = 1354;
+	@ScriptArguments(integer = 8)
+	public static final int QUESTLIST_INIT = 1350;
 
 	/**
 	 * Called when the friends list is updated
@@ -370,4 +386,45 @@ public final class ScriptID
 	 */
 	@ScriptArguments(integer = 4)
 	public static final int WIKI_ICON_UPDATE = 3306;
+
+	/**
+	 * Drag callback for the camera zoom slider in the options side panel.
+	 */
+	@ScriptArguments(integer = 3)
+	public static final int ZOOM_SLIDER_ONDRAG = 833;
+
+	/**
+	 * Drag callback for the camera zoom slider in the settings.
+	 */
+	@ScriptArguments(integer = 6)
+	public static final int SETTINGS_ZOOM_SLIDER_ONDRAG = 3896;
+
+	@ScriptArguments(integer = 6)
+	public static final int COLLECTION_DRAW_LIST = 2730;
+
+	/**
+	 * Draws the active notification in increasing sizes (increasing horizontally first, then vertically) to show a
+	 * starting animation.
+	 */
+	@ScriptArguments(integer = 3)
+	public static final int NOTIFICATION_START = 3346;
+
+	/**
+	 * Draws the active notification in full size for a specified number of client ticks. In essence, delayed between
+	 * the open and close animations.
+	 */
+	@ScriptArguments(integer = 1)
+	public static final int NOTIFICATION_DELAY = 3347;
+
+	@ScriptArguments(integer = 7)
+	public static final int GROUP_IRONMAN_STORAGE_BUILD = 5269;
+
+	@ScriptArguments(integer = 6)
+	public static final int INVENTORY_DRAWITEM = 6011;
+
+	/**
+	 * Initializes the trade interface
+	 */
+	@ScriptArguments(integer = 6)
+	public static final int TRADE_MAIN_INIT = 755;
 }

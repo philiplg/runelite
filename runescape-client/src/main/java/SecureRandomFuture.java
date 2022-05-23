@@ -7,13 +7,13 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("cz")
+@ObfuscatedName("bh")
 @Implements("SecureRandomFuture")
 public class SecureRandomFuture {
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@Export("executor")
 	ExecutorService executor;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@Export("future")
 	Future future;
 
@@ -22,10 +22,10 @@ public class SecureRandomFuture {
 		this.future = this.executor.submit(new SecureRandomCallable()); // L: 14
 	} // L: 15
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
 		descriptor = "(I)V",
-		garbageValue = "1367386525"
+		garbageValue = "-446839079"
 	)
 	@Export("shutdown")
 	void shutdown() {
@@ -33,63 +33,29 @@ public class SecureRandomFuture {
 		this.executor = null; // L: 19
 	} // L: 20
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
 		descriptor = "(I)Z",
-		garbageValue = "16711680"
+		garbageValue = "-627112505"
 	)
 	@Export("isDone")
 	boolean isDone() {
 		return this.future.isDone(); // L: 23
 	}
 
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
 		descriptor = "(B)Ljava/security/SecureRandom;",
-		garbageValue = "-104"
+		garbageValue = "-41"
 	)
 	@Export("get")
 	SecureRandom get() {
 		try {
 			return (SecureRandom)this.future.get(); // L: 28
-		} catch (Exception var2) { // L: 30
-			return class238.method4380(); // L: 31
+		} catch (Exception var4) { // L: 30
+			SecureRandom var3 = new SecureRandom(); // L: 33
+			var3.nextInt(); // L: 34
+			return var3; // L: 37
 		}
 	}
-
-	@ObfuscatedName("p")
-	@ObfuscatedSignature(
-		descriptor = "(IIIII)V",
-		garbageValue = "1485262906"
-	)
-	@Export("itemContainerSetItem")
-	static void itemContainerSetItem(int var0, int var1, int var2, int var3) {
-		ItemContainer var4 = (ItemContainer)ItemContainer.itemContainers.get((long)var0); // L: 39
-		if (var4 == null) { // L: 40
-			var4 = new ItemContainer(); // L: 41
-			ItemContainer.itemContainers.put(var4, (long)var0); // L: 42
-		}
-
-		if (var4.ids.length <= var1) { // L: 44
-			int[] var5 = new int[var1 + 1]; // L: 45
-			int[] var6 = new int[var1 + 1]; // L: 46
-
-			int var7;
-			for (var7 = 0; var7 < var4.ids.length; ++var7) { // L: 47
-				var5[var7] = var4.ids[var7]; // L: 48
-				var6[var7] = var4.quantities[var7]; // L: 49
-			}
-
-			for (var7 = var4.ids.length; var7 < var1; ++var7) { // L: 51
-				var5[var7] = -1; // L: 52
-				var6[var7] = 0; // L: 53
-			}
-
-			var4.ids = var5; // L: 55
-			var4.quantities = var6; // L: 56
-		}
-
-		var4.ids[var1] = var2; // L: 58
-		var4.quantities[var1] = var3; // L: 59
-	} // L: 60
 }

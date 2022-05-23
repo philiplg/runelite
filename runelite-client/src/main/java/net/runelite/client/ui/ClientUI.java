@@ -32,19 +32,25 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
+import static java.awt.GraphicsDevice.WindowTranslucency.TRANSLUCENT;
 import java.awt.GraphicsEnvironment;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.Window;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -106,9 +112,12 @@ import org.pushingpixels.substance.internal.utils.SubstanceTitlePaneUtilities;
 public class ClientUI
 {
 	private static final String CONFIG_GROUP = "runelite";
+	private static final String OPENOSRS_CONFIG_GROUP = "openosrs";
 	private static final String CONFIG_CLIENT_BOUNDS = "clientBounds";
 	private static final String CONFIG_CLIENT_MAXIMIZED = "clientMaximized";
 	private static final String CONFIG_CLIENT_SIDEBAR_CLOSED = "clientSidebarClosed";
+	private static final String CONFIG_OPACITY = "enableOpacity";
+	private static final String CONFIG_OPACITY_AMOUNT = "opacityPercentage";
 	public static final BufferedImage ICON = ImageUtil.loadImageResource(ClientUI.class, "/openosrs.png");
 
 	@Getter
@@ -122,6 +131,7 @@ public class ClientUI
 	private final Provider<ClientThread> clientThreadProvider;
 	private final EventBus eventBus;
 	private final boolean safeMode;
+	private final String title;
 
 	private final CardLayout cardLayout = new CardLayout();
 	private final Rectangle sidebarButtonPosition = new Rectangle();
@@ -132,17 +142,22 @@ public class ClientUI
 	@Getter
 	public static ContainableFrame frame;
 	private JPanel navContainer;
+	@Getter
 	private PluginPanel pluginPanel;
 	private ClientPluginToolbar pluginToolbar;
 	private ClientTitleToolbar titleToolbar;
 	private JButton currentButton;
 	private NavigationButton currentNavButton;
+	@Getter
 	private boolean sidebarOpen;
 	private JPanel container;
 	private NavigationButton sidebarNavigationButton;
 	private JButton sidebarNavigationJButton;
 	private Dimension lastClientSize;
 	private Cursor defaultCursor;
+	private Field opacityField;
+	private Field peerField;
+	private Method setOpacityMethod;
 
 	@Inject
 	private ClientUI(
@@ -164,12 +179,16 @@ public class ClientUI
 		this.clientThreadProvider = clientThreadProvider;
 		this.eventBus = eventBus;
 		this.safeMode = safeMode;
+		this.title = RuneLiteProperties.getTitle() + (safeMode ? " (safe mode)" : "");
 	}
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		if (!event.getGroup().equals(CONFIG_GROUP) ||
+		if (!event.getGroup().equals(CONFIG_GROUP)
+			&& !(event.getGroup().equals(OPENOSRS_CONFIG_GROUP)
+			&& event.getKey().equals(CONFIG_OPACITY) ||
+			event.getKey().equals(CONFIG_OPACITY_AMOUNT)) ||
 			event.getKey().equals(CONFIG_CLIENT_MAXIMIZED) ||
 			event.getKey().equals(CONFIG_CLIENT_BOUNDS))
 		{
@@ -211,6 +230,7 @@ public class ClientUI
 					currentButton.setSelected(false);
 					currentNavButton.setSelected(false);
 					currentButton = null;
+					currentNavButton = null;
 				}
 				else
 				{
@@ -296,7 +316,7 @@ public class ClientUI
 				return false;
 			}
 
-			frame.setTitle(RuneLiteProperties.getTitle() + " - " + name);
+			frame.setTitle(title + " - " + name);
 			return true;
 		});
 	}
@@ -323,13 +343,19 @@ public class ClientUI
 			// Try to enable fullscreen on OSX
 			OSXUtil.tryEnableFullscreen(frame);
 
-			frame.setTitle(RuneLiteProperties.getTitle());
+			frame.setTitle(title);
 			frame.setIconImage(ICON);
 			frame.getLayeredPane().setCursor(Cursor.getDefaultCursor()); // Prevent substance from using a resize cursor for pointing
 			frame.setLocationRelativeTo(frame.getOwner());
 			frame.setResizable(true);
 
 			frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			if (OSType.getOSType() == OSType.MacOS)
+			{
+				// Change the default quit strategy to CLOSE_ALL_WINDOWS so that ctrl+q
+				// triggers the listener below instead of exiting.
+				MacOSQuitStrategy.setup();
+			}
 			frame.addWindowListener(new WindowAdapter()
 			{
 				@Override
@@ -357,6 +383,16 @@ public class ClientUI
 					{
 						shutdownClient();
 					}
+				}
+			});
+
+			frame.addWindowStateListener(l ->
+			{
+				if (l.getNewState() == Frame.NORMAL)
+				{
+					// Recompute minimum size after a restore.
+					// Invoking this immediately causes the minimum size to be 8px too small with custom chrome on.
+					SwingUtilities.invokeLater(frame::revalidateMinimumSize);
 				}
 			});
 
@@ -470,7 +506,7 @@ public class ClientUI
 			}
 
 			// Update config
-			updateFrameConfig(true);
+			updateFrameConfig(false);
 
 			// Create hide sidebar button
 
@@ -509,7 +545,10 @@ public class ClientUI
 			frame.revalidateMinimumSize();
 
 			// Create tray icon (needs to be created after frame is packed)
-			trayIcon = SwingUtil.createTrayIcon(ICON, RuneLiteProperties.getTitle(), frame);
+			if (config.enableTrayIcon())
+			{
+				trayIcon = SwingUtil.createTrayIcon(ICON, title, frame);
+			}
 
 			// Move frame around (needs to be done after frame is packed)
 			if (config.rememberScreenBounds() && !safeMode)
@@ -531,7 +570,11 @@ public class ClientUI
 
 							// When Windows screen scaling is on, the position/bounds will be wrong when they are set.
 							// The bounds saved in shutdown are the full, non-scaled co-ordinates.
-							if (scale != 1)
+							// On MacOS the scaling is already applied and the position/bounds are correct on at least
+							// - 2015 x64 MBP JDK11 Mohave
+							// - 2020 m1 MBP JDK17 Big Sur
+							// Adjusting the scaling further results in the client position being incorrect
+							if (scale != 1 && OSType.getOSType() != OSType.MacOS)
 							{
 								clientBounds.setRect(
 									clientBounds.getX() / scale,
@@ -571,6 +614,8 @@ public class ClientUI
 
 			// Show frame
 			frame.setVisible(true);
+			// On macos setResizable needs to be called after setVisible
+			frame.setResizable(!config.lockWindowSize());
 			frame.toFront();
 			requestFocus();
 			log.info("Showing frame {}", frame);
@@ -742,6 +787,7 @@ public class ClientUI
 
 	/**
 	 * Returns current cursor set on game container
+	 *
 	 * @return awt cursor
 	 */
 	public Cursor getCurrentCursor()
@@ -751,6 +797,7 @@ public class ClientUI
 
 	/**
 	 * Returns current custom cursor or default system cursor if cursor is not set
+	 *
 	 * @return awt cursor
 	 */
 	public Cursor getDefaultCursor()
@@ -761,6 +808,7 @@ public class ClientUI
 	/**
 	 * Changes cursor for client window. Requires ${@link ClientUI#init()} to be called first.
 	 * FIXME: This is working properly only on Windows, Linux and Mac are displaying cursor incorrectly
+	 *
 	 * @param image cursor image
 	 * @param name  cursor name
 	 */
@@ -779,6 +827,7 @@ public class ClientUI
 
 	/**
 	 * Changes cursor for client window. Requires ${@link ClientUI#init()} to be called first.
+	 *
 	 * @param cursor awt cursor
 	 */
 	public void setCursor(final Cursor cursor)
@@ -788,6 +837,7 @@ public class ClientUI
 
 	/**
 	 * Resets client window cursor to default one.
+	 *
 	 * @see ClientUI#setCursor(BufferedImage, String)
 	 */
 	public void resetCursor()
@@ -823,6 +873,7 @@ public class ClientUI
 
 	/**
 	 * Paint UI related overlays to target graphics
+	 *
 	 * @param graphics target graphics
 	 */
 	public void paintOverlays(final Graphics2D graphics)
@@ -958,6 +1009,13 @@ public class ClientUI
 
 		int width = panel.getWrappedPanel().getPreferredSize().width;
 		int expandBy = pluginPanel != null ? pluginPanel.getWrappedPanel().getPreferredSize().width - width : width;
+
+		// Deactivate previously active panel
+		if (pluginPanel != null)
+		{
+			pluginPanel.onDeactivate();
+		}
+
 		pluginPanel = panel;
 
 		// Expand sidebar
@@ -1032,16 +1090,16 @@ public class ClientUI
 
 		if (config.usernameInTitle() && (client instanceof Client))
 		{
-			final Player player = ((Client)client).getLocalPlayer();
+			final Player player = ((Client) client).getLocalPlayer();
 
 			if (player != null && player.getName() != null)
 			{
-				frame.setTitle(RuneLiteProperties.getTitle() + " - " + player.getName());
+				frame.setTitle(title + " - " + player.getName());
 			}
 		}
 		else
 		{
-			frame.setTitle(RuneLiteProperties.getTitle());
+			frame.setTitle(title);
 		}
 
 		if (frame.isAlwaysOnTopSupported())
@@ -1069,6 +1127,26 @@ public class ClientUI
 		{
 			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_CLIENT_MAXIMIZED);
 			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_CLIENT_BOUNDS);
+		}
+
+		if (configManager.getConfiguration(OPENOSRS_CONFIG_GROUP, CONFIG_OPACITY, boolean.class))
+		{
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			GraphicsDevice gd = ge.getDefaultScreenDevice();
+
+			if (gd.isWindowTranslucencySupported(TRANSLUCENT))
+			{
+				setOpacity();
+			}
+			else
+			{
+				log.warn("Opacity isn't supported on your system!");
+				configManager.setConfiguration(OPENOSRS_CONFIG_GROUP, CONFIG_OPACITY, false);
+			}
+		}
+		else if (frame.getOpacity() != 1F)
+		{
+			frame.setOpacity(1F);
 		}
 
 		if (client == null)
@@ -1119,5 +1197,53 @@ public class ClientUI
 			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_CLIENT_MAXIMIZED);
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_CLIENT_BOUNDS, bounds);
 		}
+	}
+
+	private void setOpacity()
+	{
+		if (frame == null)
+		{
+			return;
+		}
+
+		SwingUtilities.invokeLater(() ->
+		{
+			try
+			{
+				if (opacityField == null)
+				{
+					opacityField = Window.class.getDeclaredField("opacity");
+					opacityField.setAccessible(true);
+				}
+
+				if (peerField == null)
+				{
+					peerField = Component.class.getDeclaredField("peer");
+					peerField.setAccessible(true);
+				}
+
+				if (setOpacityMethod == null)
+				{
+					setOpacityMethod = Class.forName("java.awt.peer.WindowPeer").getDeclaredMethod("setOpacity", float.class);
+				}
+
+				if (peerField.get(frame) == null)
+				{
+					return;
+				}
+
+				final float opacity = Float.parseFloat(configManager.getConfiguration(OPENOSRS_CONFIG_GROUP, CONFIG_OPACITY_AMOUNT)) / 100F;
+				assert opacity > 0F && opacity <= 1F : "I don't know who you are, I don't know why you tried, and I don't know how you tried, but this is NOT what you're supposed to do and you should honestly feel terrible about what you did, so I want you to take a nice long amount of time to think about what you just tried to do so you are not gonna do this in the future.";
+
+				opacityField.setFloat(frame, opacity);
+				setOpacityMethod.invoke(peerField.get(frame), opacity);
+
+			}
+			catch (NoSuchFieldException | NoSuchMethodException | ClassNotFoundException | IllegalAccessException |
+				InvocationTargetException e)
+			{
+				e.printStackTrace();
+			}
+		});
 	}
 }

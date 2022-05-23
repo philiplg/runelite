@@ -29,18 +29,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OverlayIndex
 {
+	@Getter
 	private static final Set<Integer> overlays = new HashSet<>();
 
 	static
 	{
-		InputStream indexStream = OverlayIndex.class.getResourceAsStream("/runelite/index");
-
-		try (DataInputStream in = new DataInputStream(indexStream))
+		try (InputStream indexStream = OverlayIndex.class.getResourceAsStream("/runelite/index");
+			DataInputStream in = new DataInputStream(indexStream))
 		{
 			int id;
 			while ((id = in.readInt()) != -1)

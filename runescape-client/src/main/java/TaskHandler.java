@@ -7,31 +7,31 @@ import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("dt")
+@ObfuscatedName("fs")
 @Implements("TaskHandler")
 public class TaskHandler implements Runnable {
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@Export("javaVendor")
 	public static String javaVendor;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@Export("javaVersion")
 	public static String javaVersion;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "Lep;"
+		descriptor = "Lfl;"
 	)
 	@Export("current")
 	Task current;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		descriptor = "Lep;"
+		descriptor = "Lfl;"
 	)
 	@Export("task")
 	Task task;
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@Export("thread")
 	Thread thread;
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@Export("isClosed")
 	boolean isClosed;
 
@@ -55,10 +55,10 @@ public class TaskHandler implements Runnable {
 		this.thread.start(); // L: 31
 	} // L: 32
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
 		descriptor = "(I)V",
-		garbageValue = "732898192"
+		garbageValue = "1440718962"
 	)
 	@Export("close")
 	public final void close() {
@@ -74,10 +74,10 @@ public class TaskHandler implements Runnable {
 
 	} // L: 43
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(IIILjava/lang/Object;I)Lep;",
-		garbageValue = "743067634"
+		descriptor = "(IIILjava/lang/Object;I)Lfl;",
+		garbageValue = "1484642782"
 	)
 	@Export("newTask")
 	final Task newTask(int var1, int var2, int var3, Object var4) {
@@ -98,20 +98,20 @@ public class TaskHandler implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "(Ljava/lang/String;IB)Lep;",
-		garbageValue = "-31"
+		descriptor = "(Ljava/lang/String;II)Lfl;",
+		garbageValue = "1024019511"
 	)
 	@Export("newSocketTask")
 	public final Task newSocketTask(String var1, int var2) {
 		return this.newTask(1, var2, 0, var1); // L: 108
 	}
 
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		descriptor = "(Ljava/lang/Runnable;IB)Lep;",
-		garbageValue = "-100"
+		descriptor = "(Ljava/lang/Runnable;II)Lfl;",
+		garbageValue = "1474796416"
 	)
 	@Export("newThreadTask")
 	public final Task newThreadTask(Runnable var1, int var2) {
@@ -166,37 +166,133 @@ public class TaskHandler implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(I)V",
-		garbageValue = "1532861557"
+		descriptor = "(I)Z",
+		garbageValue = "2007350025"
 	)
-	static void method2524() {
-		Players.Players_count = 0; // L: 616
-
-		for (int var0 = 0; var0 < 2048; ++var0) { // L: 617
-			Players.field1352[var0] = null; // L: 618
-			Players.field1351[var0] = 1; // L: 619
+	@Export("isKeyDown")
+	public static final boolean isKeyDown() {
+		synchronized(KeyHandler.KeyHandler_instance) { // L: 132
+			if (KeyHandler.field144 == KeyHandler.field142) { // L: 133
+				return false;
+			} else {
+				class12.field61 = KeyHandler.field122[KeyHandler.field142]; // L: 134
+				InvDefinition.field1850 = KeyHandler.field136[KeyHandler.field142]; // L: 135
+				KeyHandler.field142 = KeyHandler.field142 + 1 & 127; // L: 136
+				return true; // L: 137
+			}
 		}
+	}
 
-	} // L: 621
-
-	@ObfuscatedName("lx")
+	@ObfuscatedName("is")
 	@ObfuscatedSignature(
-		descriptor = "(I)V",
-		garbageValue = "800079546"
+		descriptor = "(IIIILjava/lang/String;I)V",
+		garbageValue = "87331600"
 	)
-	static void method2523() {
-		if (class105.field1331 != null) { // L: 11737
-			Client.field623 = Client.cycle; // L: 11738
-			class105.field1331.method4657(); // L: 11739
+	@Export("widgetDefaultMenuAction")
+	static void widgetDefaultMenuAction(int var0, int var1, int var2, int var3, String var4) {
+		Widget var5 = ApproximateRouteStrategy.getWidgetChild(var1, var2); // L: 9808
+		if (var5 != null) { // L: 9809
+			if (var5.onOp != null) { // L: 9810
+				ScriptEvent var6 = new ScriptEvent(); // L: 9811
+				var6.widget = var5; // L: 9812
+				var6.opIndex = var0; // L: 9813
+				var6.targetName = var4; // L: 9814
+				var6.args = var5.onOp; // L: 9815
+				class144.runScriptEvent(var6); // L: 9816
+			}
 
-			for (int var0 = 0; var0 < Client.players.length; ++var0) { // L: 11740
-				if (Client.players[var0] != null) { // L: 11741
-					class105.field1331.method4656((Client.players[var0].x >> 7) + ItemLayer.baseX, (Client.players[var0].y >> 7) + Tile.baseY); // L: 11742
+			boolean var8 = true; // L: 9818
+			if (var5.contentType > 0) { // L: 9819
+				var8 = ReflectionCheck.method599(var5);
+			}
+
+			if (var8) { // L: 9820
+				if (MenuAction.method1880(UrlRequester.getWidgetFlags(var5), var0 - 1)) { // L: 9821
+					PacketBufferNode var7;
+					if (var0 == 1) { // L: 9824
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field3006, Client.packetWriter.isaacCipher); // L: 9826
+						var7.packetBuffer.writeInt(var1); // L: 9827
+						var7.packetBuffer.writeShort(var2); // L: 9828
+						var7.packetBuffer.writeShort(var3); // L: 9829
+						Client.packetWriter.addNode(var7); // L: 9830
+					}
+
+					if (var0 == 2) { // L: 9832
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field3032, Client.packetWriter.isaacCipher); // L: 9834
+						var7.packetBuffer.writeInt(var1); // L: 9835
+						var7.packetBuffer.writeShort(var2); // L: 9836
+						var7.packetBuffer.writeShort(var3); // L: 9837
+						Client.packetWriter.addNode(var7); // L: 9838
+					}
+
+					if (var0 == 3) { // L: 9840
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field3011, Client.packetWriter.isaacCipher); // L: 9842
+						var7.packetBuffer.writeInt(var1); // L: 9843
+						var7.packetBuffer.writeShort(var2); // L: 9844
+						var7.packetBuffer.writeShort(var3); // L: 9845
+						Client.packetWriter.addNode(var7); // L: 9846
+					}
+
+					if (var0 == 4) { // L: 9848
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field2956, Client.packetWriter.isaacCipher); // L: 9850
+						var7.packetBuffer.writeInt(var1); // L: 9851
+						var7.packetBuffer.writeShort(var2); // L: 9852
+						var7.packetBuffer.writeShort(var3); // L: 9853
+						Client.packetWriter.addNode(var7); // L: 9854
+					}
+
+					if (var0 == 5) { // L: 9856
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field2960, Client.packetWriter.isaacCipher); // L: 9858
+						var7.packetBuffer.writeInt(var1); // L: 9859
+						var7.packetBuffer.writeShort(var2); // L: 9860
+						var7.packetBuffer.writeShort(var3); // L: 9861
+						Client.packetWriter.addNode(var7); // L: 9862
+					}
+
+					if (var0 == 6) { // L: 9864
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field2968, Client.packetWriter.isaacCipher); // L: 9866
+						var7.packetBuffer.writeInt(var1); // L: 9867
+						var7.packetBuffer.writeShort(var2); // L: 9868
+						var7.packetBuffer.writeShort(var3); // L: 9869
+						Client.packetWriter.addNode(var7); // L: 9870
+					}
+
+					if (var0 == 7) { // L: 9872
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field3002, Client.packetWriter.isaacCipher); // L: 9874
+						var7.packetBuffer.writeInt(var1); // L: 9875
+						var7.packetBuffer.writeShort(var2); // L: 9876
+						var7.packetBuffer.writeShort(var3); // L: 9877
+						Client.packetWriter.addNode(var7); // L: 9878
+					}
+
+					if (var0 == 8) { // L: 9880
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field2989, Client.packetWriter.isaacCipher); // L: 9882
+						var7.packetBuffer.writeInt(var1); // L: 9883
+						var7.packetBuffer.writeShort(var2); // L: 9884
+						var7.packetBuffer.writeShort(var3); // L: 9885
+						Client.packetWriter.addNode(var7); // L: 9886
+					}
+
+					if (var0 == 9) { // L: 9888
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field3015, Client.packetWriter.isaacCipher); // L: 9890
+						var7.packetBuffer.writeInt(var1); // L: 9891
+						var7.packetBuffer.writeShort(var2); // L: 9892
+						var7.packetBuffer.writeShort(var3); // L: 9893
+						Client.packetWriter.addNode(var7); // L: 9894
+					}
+
+					if (var0 == 10) { // L: 9896
+						var7 = WallDecoration.getPacketBufferNode(ClientPacket.field3043, Client.packetWriter.isaacCipher); // L: 9898
+						var7.packetBuffer.writeInt(var1); // L: 9899
+						var7.packetBuffer.writeShort(var2); // L: 9900
+						var7.packetBuffer.writeShort(var3); // L: 9901
+						Client.packetWriter.addNode(var7); // L: 9902
+					}
+
 				}
 			}
 		}
-
-	} // L: 11746
+	} // L: 9822 9904
 }

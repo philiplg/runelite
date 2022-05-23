@@ -57,8 +57,6 @@ import net.runelite.client.util.ColorUtil;
 public class KeyRemappingPlugin extends Plugin
 {
 	private static final String PRESS_ENTER_TO_CHAT = "Press Enter to Chat...";
-	private static final String SCRIPT_EVENT_SET_CHATBOX_INPUT = "setChatboxInput";
-	private static final String SCRIPT_EVENT_BLOCK_CHAT_INPUT = "blockChatInput";
 
 	@Inject
 	private Client client;
@@ -160,14 +158,14 @@ public class KeyRemappingPlugin extends Plugin
 	{
 		switch (scriptCallbackEvent.getEventName())
 		{
-			case SCRIPT_EVENT_SET_CHATBOX_INPUT:
+			case "setChatboxInput":
 				Widget chatboxInput = client.getWidget(WidgetInfo.CHATBOX_INPUT);
 				if (chatboxInput != null && !typing)
 				{
 					setChatboxWidgetInput(chatboxInput, PRESS_ENTER_TO_CHAT);
 				}
 				break;
-			case SCRIPT_EVENT_BLOCK_CHAT_INPUT:
+			case "blockChatInput":
 				if (!typing)
 				{
 					int[] intStack = client.getIntStack();
@@ -194,7 +192,7 @@ public class KeyRemappingPlugin extends Plugin
 		{
 			if (client.getGameState() == GameState.LOGGED_IN)
 			{
-				final boolean isChatboxTransparent = client.isResized() && client.getVar(Varbits.TRANSPARENT_CHATBOX) == 1;
+				final boolean isChatboxTransparent = client.isResized() && client.getVarbitValue(Varbits.TRANSPARENT_CHATBOX) == 1;
 				final Color textColor = isChatboxTransparent ? JagexColors.CHAT_TYPED_TEXT_TRANSPARENT_BACKGROUND : JagexColors.CHAT_TYPED_TEXT_OPAQUE_BACKGROUND;
 				setChatboxWidgetInput(chatboxInput, ColorUtil.wrapWithColorTag(client.getVar(VarClientStr.CHATBOX_TYPED_TEXT) + "*", textColor));
 			}

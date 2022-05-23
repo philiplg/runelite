@@ -2,111 +2,102 @@ import net.runelite.mapping.Export;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
-import net.runelite.rs.ScriptOpcodes;
 
-@ObfuscatedName("k")
-public class class6 extends class14 {
-	@ObfuscatedName("bo")
-	@ObfuscatedSignature(
-		descriptor = "[Low;"
-	)
-	@Export("worldSelectArrows")
-	static IndexedSprite[] worldSelectArrows;
-	@ObfuscatedName("ii")
-	@ObfuscatedGetter(
-		intValue = 1971024859
-	)
-	@Export("oculusOrbFocalPointX")
-	static int oculusOrbFocalPointX;
-	@ObfuscatedName("f")
-	@ObfuscatedGetter(
-		intValue = -394718965
-	)
-	int field49;
+@ObfuscatedName("p")
+public enum class6 implements MouseWheel {
 	@ObfuscatedName("o")
-	@ObfuscatedGetter(
-		intValue = 1266108419
-	)
-	int field46;
-	// $FF: synthetic field
 	@ObfuscatedSignature(
-		descriptor = "Lu;"
+		descriptor = "Lp;"
 	)
-	final class2 this$0;
+	field16(0, 0);
 
-	@ObfuscatedSignature(
-		descriptor = "(Lu;)V"
+	@ObfuscatedName("i")
+	@Export("BZip2Decompressor_block")
+	static int[] BZip2Decompressor_block;
+	@ObfuscatedName("q")
+	@ObfuscatedGetter(
+		intValue = 2103814257
 	)
-	class6(class2 var1) {
-		this.this$0 = var1; // L: 271
+	public final int field11;
+	@ObfuscatedName("l")
+	@ObfuscatedGetter(
+		intValue = 23593839
+	)
+	final int field15;
+
+	class6(int var3, int var4) {
+		this.field11 = var3; // L: 12
+		this.field15 = var4; // L: 13
+	} // L: 14
+
+	@ObfuscatedName("o")
+	@ObfuscatedSignature(
+		descriptor = "(B)I",
+		garbageValue = "30"
+	)
+	@Export("rsOrdinal")
+	public int rsOrdinal() {
+		return this.field15; // L: 18
 	}
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("m")
 	@ObfuscatedSignature(
-		descriptor = "(Lnu;I)V",
-		garbageValue = "-1383981708"
+		descriptor = "(III)I",
+		garbageValue = "-918039654"
 	)
-	void vmethod371(Buffer var1) {
-		this.field49 = var1.readInt(); // L: 274
-		this.field46 = var1.readInt(); // L: 275
-	} // L: 276
+	static int method45(int var0, int var1) {
+		long var2 = (long)((var0 << 16) + var1); // L: 164
+		return WorldMapIcon_0.NetCache_currentResponse != null && var2 == WorldMapIcon_0.NetCache_currentResponse.key ? class357.NetCache_responseArchiveBuffer.offset * 99 / (class357.NetCache_responseArchiveBuffer.array.length - WorldMapIcon_0.NetCache_currentResponse.padding) + 1 : 0; // L: 165 166
+	}
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("t")
 	@ObfuscatedSignature(
-		descriptor = "(Lm;I)V",
-		garbageValue = "-1475503816"
+		descriptor = "(CB)Z",
+		garbageValue = "-55"
 	)
-	void vmethod376(class11 var1) {
-		var1.method178(this.field49, this.field46); // L: 279
-	} // L: 280
-
-	@ObfuscatedName("f")
-	@ObfuscatedSignature(
-		descriptor = "(Lir;I)V",
-		garbageValue = "620748591"
-	)
-	public static void method97(AbstractArchive var0) {
-		ParamComposition.ParamDefinition_archive = var0; // L: 21
-	} // L: 22
-
-	@ObfuscatedName("u")
-	@ObfuscatedSignature(
-		descriptor = "(I)Lgy;",
-		garbageValue = "629458679"
-	)
-	public static PacketBufferNode method98() {
-		PacketBufferNode var0;
-		if (PacketBufferNode.PacketBufferNode_packetBufferNodeCount == 0) { // L: 44
-			var0 = new PacketBufferNode(); // L: 45
+	@Export("isCharPrintable")
+	public static boolean isCharPrintable(char var0) {
+		if (var0 >= ' ' && var0 <= '~') { // L: 187
+			return true;
+		} else if (var0 >= 160 && var0 <= 255) {
+			return true; // L: 188
 		} else {
-			var0 = PacketBufferNode.PacketBufferNode_packetBufferNodes[--PacketBufferNode.PacketBufferNode_packetBufferNodeCount]; // L: 48
+			return var0 == 8364 || var0 == 338 || var0 == 8212 || var0 == 339 || var0 == 376; // L: 189
 		}
-
-		var0.clientPacket = null; // L: 51
-		var0.clientPacketLength = 0; // L: 52
-		var0.packetBuffer = new PacketBuffer(5000); // L: 53
-		return var0; // L: 54
 	}
 
-	@ObfuscatedName("ax")
+	@ObfuscatedName("ah")
 	@ObfuscatedSignature(
-		descriptor = "(ILcc;ZB)I",
-		garbageValue = "1"
+		descriptor = "(ILbb;ZI)I",
+		garbageValue = "1816581663"
 	)
-	static int method96(int var0, Script var1, boolean var2) {
-		if (var0 == ScriptOpcodes.LOGOUT) { // L: 3445
-			Client.logoutTimer = 250; // L: 3446
-			return 1; // L: 3447
-		} else if (var0 != 5631 && var0 != 5633) { // L: 3449
-			if (var0 == 5632) { // L: 3453
-				Interpreter.Interpreter_intStack[++class16.Interpreter_intStackSize - 1] = 26; // L: 3454
-				return 1; // L: 3455
+	static int method47(int var0, Script var1, boolean var2) {
+		if (var0 != 6700 && var0 != 6702 && var0 != 6704 && var0 != 6706 && var0 != 6708) { // L: 4484
+			if (var0 != 6701 && var0 != 6703 && var0 != 6705 && var0 != 6707 && var0 != 6709) { // L: 4489
+				if (var0 == 6750) { // L: 4493
+					Interpreter.Interpreter_stringStack[++class9.Interpreter_stringStackSize - 1] = ""; // L: 4494
+					return 1; // L: 4495
+				} else if (var0 != 6751 && var0 != 6752 && var0 != 6753) { // L: 4497
+					if (var0 == 6754) { // L: 4501
+						int var3 = Interpreter.Interpreter_intStack[--class12.Interpreter_intStackSize]; // L: 4502
+						NPCComposition var4 = WorldMapSectionType.getNpcDefinition(var3); // L: 4503
+						Interpreter.Interpreter_stringStack[++class9.Interpreter_stringStackSize - 1] = var4 != null ? var4.name : ""; // L: 4504
+						return 1; // L: 4505
+					} else {
+						return 2; // L: 4507
+					}
+				} else {
+					Interpreter.Interpreter_intStack[++class12.Interpreter_intStackSize - 1] = -1; // L: 4498
+					return 1; // L: 4499
+				}
 			} else {
-				return 2; // L: 3457
+				--class12.Interpreter_intStackSize; // L: 4490
+				return 1; // L: 4491
 			}
 		} else {
-			Interpreter.Interpreter_stringStackSize -= 2; // L: 3450
-			return 1; // L: 3451
+			class12.Interpreter_intStackSize -= 2; // L: 4485
+			--class9.Interpreter_stringStackSize; // L: 4486
+			return 1; // L: 4487
 		}
 	}
 }

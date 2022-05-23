@@ -27,7 +27,7 @@ package net.runelite.mixins;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static net.runelite.api.Opcodes.*;
+import net.runelite.api.ChatMessageType;
 import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.ScriptPreFired;
@@ -37,6 +37,10 @@ import net.runelite.api.mixins.Mixin;
 import net.runelite.api.mixins.Replace;
 import net.runelite.api.mixins.Shadow;
 import net.runelite.api.widgets.JavaScriptCallback;
+import static net.runelite.cache.script.Opcodes.CAM_FORCEANGLE;
+import static net.runelite.cache.script.Opcodes.INVOKE;
+import static net.runelite.cache.script.Opcodes.RETURN;
+import static net.runelite.cache.script.RuneLiteOpcodes.RUNELITE_EXECUTE;
 import net.runelite.rs.api.RSClient;
 import net.runelite.rs.api.RSScript;
 import net.runelite.rs.api.RSScriptEvent;
@@ -65,7 +69,8 @@ public abstract class ScriptVMMixin implements RSClient
 		{
 			if (script != null)
 			{
-				ScriptPreFired event = new ScriptPreFired((int) script.getHash(), rootScriptEvent);
+				ScriptPreFired event = new ScriptPreFired((int) script.getHash());
+				event.setScriptEvent(rootScriptEvent);
 				client.getCallbacks().post(event);
 			}
 
@@ -119,7 +124,16 @@ public abstract class ScriptVMMixin implements RSClient
 					client.setIntStackSize(intStackSize);
 					return true;
 				}
-
+				else if ("mes".equals(stringOp))
+				{
+					int intStackSize = client.getIntStackSize();
+					int messageType = client.getIntStack()[--intStackSize];
+					String message = client.getStringStack()[--stringStackSize];
+					client.setStringStackSize(stringStackSize);
+					client.setIntStackSize(intStackSize);
+					client.addChatMessage(ChatMessageType.of(messageType), "", message, null, true);
+					return true;
+				}
 				ScriptCallbackEvent event = new ScriptCallbackEvent();
 				event.setScript(currentScript);
 				event.setEventName(stringOp);
@@ -127,10 +141,21 @@ public abstract class ScriptVMMixin implements RSClient
 				return true;
 			case INVOKE:
 				int scriptId = currentScript.getIntOperands()[currentScriptPC];
-				client.getCallbacks().post(new ScriptPreFired(scriptId, null));
+				client.getCallbacks().post(new ScriptPreFired(scriptId));
 				return false;
 			case RETURN:
 				client.getCallbacks().post(new ScriptPostFired((int) currentScript.getHash()));
+				return false;
+			case CAM_FORCEANGLE:
+				int[] intStack = client.getIntStack();
+				int intStackSize = client.getIntStackSize();
+				int var4 = intStack[intStackSize - 1];
+				int var3 = intStack[intStackSize - 2];
+				if (!client.isCameraLocked())
+				{
+					client.posToCameraAngle(var4, var3);
+				}
+
 				return false;
 		}
 		return false;

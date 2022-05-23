@@ -44,12 +44,16 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.ReflectUtil;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 
 @Slf4j
 @RequiredArgsConstructor
 @ThreadSafe
 public class EventBus
 {
+	private static final Marker DEDUPLICATE = MarkerFactory.getMarker("DEDUPLICATE");
+
 	@Value
 	public static class Subscriber
 	{
@@ -82,7 +86,7 @@ public class EventBus
 	 */
 	public EventBus()
 	{
-		this((e) -> log.warn("Uncaught exception in event subscriber", e));
+		this((e) -> log.warn(DEDUPLICATE, "Uncaught exception in event subscriber", e));
 	}
 
 	/**
@@ -96,7 +100,7 @@ public class EventBus
 	{
 		final ImmutableMultimap.Builder<Class<?>, Subscriber> builder = ImmutableMultimap.builder();
 		builder.putAll(subscribers);
-		builder.orderValuesBy(Comparator.comparing(Subscriber::getPriority).reversed()
+		builder.orderValuesBy(Comparator.comparingDouble(Subscriber::getPriority).reversed()
 			.thenComparing(s -> s.object.getClass().getName()));
 
 		for (Class<?> clazz = object.getClass(); clazz != null; clazz = clazz.getSuperclass())
@@ -164,7 +168,7 @@ public class EventBus
 	{
 		final ImmutableMultimap.Builder<Class<?>, Subscriber> builder = ImmutableMultimap.builder();
 		builder.putAll(subscribers);
-		builder.orderValuesBy(Comparator.comparing(Subscriber::getPriority).reversed()
+		builder.orderValuesBy(Comparator.comparingDouble(Subscriber::getPriority).reversed()
 			.thenComparing(s -> s.object.getClass().getName()));
 
 		Subscriber sub = new Subscriber(subFn, null, priority, (Consumer<Object>) subFn);
@@ -215,8 +219,10 @@ public class EventBus
 			{
 				subscriber.invoke(event);
 			}
-			catch (Exception e)
+			catch (Throwable e)
 			{
+				// here i'd really like to disable the bad plugin,
+				// but failing that i can't do much...
 				exceptionHandler.accept(e);
 			}
 		}

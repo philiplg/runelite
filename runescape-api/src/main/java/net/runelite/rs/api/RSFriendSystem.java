@@ -1,11 +1,12 @@
 package net.runelite.rs.api;
 
+import net.runelite.api.FriendContainer;
 import net.runelite.mapping.Import;
 
 public interface RSFriendSystem
 {
 	@Import("friendsList")
-	RSFriendsList getFriendContainer();
+	FriendContainer getFriendContainer();
 
 	@Import("ignoreList")
 	RSIgnoreList getIgnoreContainer();
@@ -21,4 +22,10 @@ public interface RSFriendSystem
 
 	@Import("removeFriend")
 	void removeFriend(String username);
+
+	@Import("addIgnore")
+	void addIgnore(String username);
+
+	@Import("removeIgnore")
+	void removeIgnore(String username);
 }

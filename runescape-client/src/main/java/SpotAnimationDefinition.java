@@ -4,90 +4,84 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("kb")
+@ObfuscatedName("fw")
 @Implements("SpotAnimationDefinition")
 public class SpotAnimationDefinition extends DualNode {
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "Lir;"
+		descriptor = "Llp;"
 	)
 	@Export("SpotAnimationDefinition_archive")
 	public static AbstractArchive SpotAnimationDefinition_archive;
-	@ObfuscatedName("o")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
 		descriptor = "Lir;"
 	)
-	@Export("SpotAnimationDefinition_modelArchive")
-	public static AbstractArchive SpotAnimationDefinition_modelArchive;
-	@ObfuscatedName("u")
-	@ObfuscatedSignature(
-		descriptor = "Lgf;"
-	)
 	@Export("SpotAnimationDefinition_cached")
 	public static EvictingDualNodeHashTable SpotAnimationDefinition_cached;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		descriptor = "Lgf;"
+		descriptor = "Lir;"
 	)
 	@Export("SpotAnimationDefinition_cachedModels")
 	public static EvictingDualNodeHashTable SpotAnimationDefinition_cachedModels;
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@ObfuscatedGetter(
-		intValue = -1763837413
+		intValue = -1265887753
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = -680345807
+		intValue = 1347640095
 	)
 	@Export("archive")
 	int archive;
-	@ObfuscatedName("k")
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = -1398815435
+		intValue = 2010808801
 	)
 	@Export("sequence")
 	public int sequence;
-	@ObfuscatedName("g")
+	@ObfuscatedName("s")
 	@Export("recolorFrom")
 	short[] recolorFrom;
-	@ObfuscatedName("h")
+	@ObfuscatedName("r")
 	@Export("recolorTo")
 	short[] recolorTo;
-	@ObfuscatedName("n")
+	@ObfuscatedName("v")
 	@Export("retextureFrom")
 	short[] retextureFrom;
-	@ObfuscatedName("l")
+	@ObfuscatedName("y")
 	@Export("retextureTo")
 	short[] retextureTo;
-	@ObfuscatedName("m")
+	@ObfuscatedName("c")
 	@ObfuscatedGetter(
-		intValue = 91063733
+		intValue = 816040179
 	)
 	@Export("widthScale")
 	int widthScale;
-	@ObfuscatedName("d")
+	@ObfuscatedName("w")
 	@ObfuscatedGetter(
-		intValue = -1248170611
+		intValue = 1605734173
 	)
 	@Export("heightScale")
 	int heightScale;
-	@ObfuscatedName("c")
+	@ObfuscatedName("b")
 	@ObfuscatedGetter(
-		intValue = -211246217
+		intValue = 166860727
 	)
 	@Export("orientation")
 	int orientation;
-	@ObfuscatedName("j")
+	@ObfuscatedName("t")
 	@ObfuscatedGetter(
-		intValue = 87174687
+		intValue = -373307205
 	)
 	@Export("ambient")
 	int ambient;
-	@ObfuscatedName("r")
+	@ObfuscatedName("g")
 	@ObfuscatedGetter(
-		intValue = -477885717
+		intValue = 1923246683
 	)
 	@Export("contrast")
 	int contrast;
@@ -106,10 +100,10 @@ public class SpotAnimationDefinition extends DualNode {
 		this.contrast = 0; // L: 27
 	} // L: 29
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(Lnu;B)V",
-		garbageValue = "29"
+		descriptor = "(Lpx;B)V",
+		garbageValue = "39"
 	)
 	@Export("decode")
 	void decode(Buffer var1) {
@@ -123,10 +117,10 @@ public class SpotAnimationDefinition extends DualNode {
 		}
 	}
 
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "(Lnu;II)V",
-		garbageValue = "1730148365"
+		descriptor = "(Lpx;II)V",
+		garbageValue = "2139192007"
 	)
 	@Export("decodeNext")
 	void decodeNext(Buffer var1, int var2) {
@@ -170,16 +164,16 @@ public class SpotAnimationDefinition extends DualNode {
 
 	} // L: 77
 
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		descriptor = "(II)Lgv;",
-		garbageValue = "-1890190190"
+		descriptor = "(II)Lhv;",
+		garbageValue = "835849725"
 	)
 	@Export("getModel")
 	public final Model getModel(int var1) {
 		Model var2 = (Model)SpotAnimationDefinition_cachedModels.get((long)this.id); // L: 80
 		if (var2 == null) { // L: 81
-			ModelData var3 = ModelData.ModelData_get(SpotAnimationDefinition_modelArchive, this.archive, 0); // L: 82
+			ModelData var3 = ModelData.ModelData_get(class175.SpotAnimationDefinition_modelArchive, this.archive, 0); // L: 82
 			if (var3 == null) { // L: 83
 				return null;
 			}
@@ -203,7 +197,7 @@ public class SpotAnimationDefinition extends DualNode {
 
 		Model var5;
 		if (this.sequence != -1 && var1 != -1) { // L: 98
-			var5 = class225.SequenceDefinition_get(this.sequence).transformSpotAnimationModel(var2, var1);
+			var5 = class114.SequenceDefinition_get(this.sequence).transformSpotAnimationModel(var2, var1);
 		} else {
 			var5 = var2.toSharedSpotAnimationModel(true); // L: 99
 		}
@@ -230,37 +224,5 @@ public class SpotAnimationDefinition extends DualNode {
 		}
 
 		return var5; // L: 113
-	}
-
-	@ObfuscatedName("al")
-	@ObfuscatedSignature(
-		descriptor = "(ILcc;ZB)I",
-		garbageValue = "3"
-	)
-	static int method5048(int var0, Script var1, boolean var2) {
-		if (var0 >= 7200 && var0 < 7204) { // L: 4240
-			class16.Interpreter_intStackSize -= 5; // L: 4241
-			Interpreter.Interpreter_intStack[++class16.Interpreter_intStackSize - 1] = -1; // L: 4242
-			return 1; // L: 4243
-		} else if (var0 == 7204) { // L: 4245
-			class16.Interpreter_intStackSize -= 6; // L: 4246
-			Interpreter.Interpreter_intStack[++class16.Interpreter_intStackSize - 1] = -1; // L: 4247
-			return 1; // L: 4248
-		} else if (var0 >= 7205 && var0 < 7209) { // L: 4250
-			Interpreter.Interpreter_intStack[class16.Interpreter_intStackSize - 1] = -1; // L: 4251
-			return 1; // L: 4252
-		} else if (var0 == 7209) { // L: 4254
-			class16.Interpreter_intStackSize -= 2; // L: 4255
-			Interpreter.Interpreter_intStack[++class16.Interpreter_intStackSize - 1] = -1; // L: 4256
-			return 1; // L: 4257
-		} else if (var0 >= 7210 && var0 < 7214) { // L: 4259
-			--class16.Interpreter_intStackSize; // L: 4260
-			return 1; // L: 4261
-		} else if (var0 == 7214) { // L: 4263
-			class16.Interpreter_intStackSize -= 2; // L: 4264
-			return 1; // L: 4265
-		} else {
-			return 2; // L: 4267
-		}
 	}
 }

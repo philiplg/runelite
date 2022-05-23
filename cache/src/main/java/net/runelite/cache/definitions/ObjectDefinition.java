@@ -44,7 +44,7 @@ public class ObjectDefinition
 	private int sizeX = 1;
 	private int sizeY = 1;
 	private int anInt2083 = 0;
-	private int[] anIntArray2084;
+	private int[] ambientSoundIds;
 	private int offsetX = 0;
 	private boolean mergeNormals = false;
 	private int wallOrDoor = -1;
@@ -68,6 +68,7 @@ public class ObjectDefinition
 	private int contouredGround = -1;
 	private int supportsItems = -1;
 	private int[] configChangeDest;
+	private int category;
 	private boolean isRotated = false;
 	private int varpID = -1;
 	private int ambientSoundId = -1;

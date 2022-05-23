@@ -14,8 +14,10 @@ dependencies {
     vanillaDep(group = "net.runelite.rs", name = "vanilla", version = rsversion.toString())
 
     annotationProcessor(group = "org.projectlombok", name = "lombok", version = ProjectVersions.lombokVersion)
+    testAnnotationProcessor(group = "org.projectlombok", name = "lombok", version = ProjectVersions.lombokVersion)
 
     compileOnly(group = "org.projectlombok", name = "lombok", version = ProjectVersions.lombokVersion)
+    testCompileOnly(group = "org.projectlombok", name = "lombok", version = ProjectVersions.lombokVersion)
 
     implementation(gradleApi())
 
@@ -24,11 +26,13 @@ dependencies {
     implementation(project(":runescape-client"))
     implementation(project(":runelite-mixins"))
 
-    implementation(group = "org.ow2.asm", name = "asm", version = "8.0.1")
-    implementation(group = "org.ow2.asm", name = "asm-util", version = "8.0.1")
-    implementation(group = "org.jetbrains", name = "annotations", version = "19.0.0")
-    implementation(group = "com.google.guava", name = "guava", version = "23.2-jre")
-    implementation(group = "net.sf.jopt-simple", name = "jopt-simple", version = "5.0.1")
+    implementation(group = "org.ow2.asm", name = "asm", version = "9.0")
+    implementation(group = "org.ow2.asm", name = "asm-util", version = "9.0")
+    implementation(group = "org.jetbrains", name = "annotations", version = "22.0.0")
+    implementation(group = "com.google.guava", name = "guava", version = "30.1.1-jre")
+    implementation(group = "net.sf.jopt-simple", name = "jopt-simple", version = "5.0.4")
+
+    testImplementation(group = "junit", name = "junit", version = "4.12")
 }
 
 tasks.register<JavaExec>("inject") {

@@ -117,13 +117,19 @@ public interface Actor extends Renderable, Locatable
 	int getPoseFrameCycle();
 
 	/**
-	 * Gets the orientation of the actor.
+	 * Gets the target orientation of the actor.
 	 *
 	 * @return the orientation
 	 * @see net.runelite.api.coords.Angle
 	 */
 	int getOrientation();
 
+	/**
+	 * Gets the current orientation of the actor.
+	 *
+	 * @return the orientation
+	 * @see net.runelite.api.coords.Angle
+	 */
 	int getCurrentOrientation();
 
 	/**
@@ -165,6 +171,8 @@ public interface Actor extends Renderable, Locatable
 	 */
 	int getIdleRotateLeft();
 
+	void setIdleRotateLeft(int animationID);
+
 	/**
 	 * Animation used for rotating right if the actor is also not walking
 	 *
@@ -172,6 +180,8 @@ public interface Actor extends Renderable, Locatable
 	 * @see AnimationID
 	 */
 	int getIdleRotateRight();
+
+	void setIdleRotateRight(int animationID);
 
 	/**
 	 * Animation used for walking
@@ -181,6 +191,8 @@ public interface Actor extends Renderable, Locatable
 	 */
 	int getWalkAnimation();
 
+	void setWalkAnimation(int animationID);
+
 	/**
 	 * Animation used for rotating left while walking
 	 *
@@ -188,6 +200,8 @@ public interface Actor extends Renderable, Locatable
 	 * @see AnimationID
 	 */
 	int getWalkRotateLeft();
+
+	void setWalkRotateLeft(int animationID);
 
 	/**
 	 * Animation used for rotating right while walking
@@ -197,6 +211,8 @@ public interface Actor extends Renderable, Locatable
 	 */
 	int getWalkRotateRight();
 
+	void setWalkRotateRight(int animationID);
+
 	/**
 	 * Animation used for an about-face while walking
 	 *
@@ -205,6 +221,8 @@ public interface Actor extends Renderable, Locatable
 	 */
 	int getWalkRotate180();
 
+	void setWalkRotate180(int animationID);
+
 	/**
 	 * Animation used for running
 	 *
@@ -212,6 +230,8 @@ public interface Actor extends Renderable, Locatable
 	 * @see AnimationID
 	 */
 	int getRunAnimation();
+
+	void setRunAnimation(int animationID);
 
 	/**
 	 * Sets an animation for the actor to perform.
@@ -261,6 +281,18 @@ public interface Actor extends Renderable, Locatable
 	void setGraphic(int graphic);
 
 	/**
+	 * Get the height of the graphic/spotanim on the actor
+	 * @return
+	 */
+	int getGraphicHeight();
+
+	/**
+	 * Set the height of the graphic/spotanim on the actor
+	 * @param height
+	 */
+	void setGraphicHeight(int height);
+
+	/**
 	 * Get the frame of the currently playing spotanim
 	 *
 	 * @return
@@ -275,7 +307,7 @@ public interface Actor extends Renderable, Locatable
 	void setSpotAnimFrame(int spotAnimFrame);
 
 	/**
-	 * Gets the canvas area of the current tile the actor is standing on.
+	 * Gets the canvas area of the current tiles the actor is standing on.
 	 *
 	 * @return the current tile canvas area
 	 */
@@ -368,7 +400,21 @@ public interface Actor extends Renderable, Locatable
 	int getActionFrameCycle();
 
 	/**
-	 * Returns true if this NPC has died
+	 * Get the number of cycles/client ticks remaining before the overhead text is timed out
+	 *
+	 * @return
+	 */
+	int getOverheadCycle();
+
+	/**
+	 * Set the number of cycles/client ticks before the overhead text is timed out
+	 *
+	 * @param cycles
+	 */
+	void setOverheadCycle(int cycles);
+
+	/**
+	 * Returns true if this actor has died
 	 *
 	 * @return
 	 */

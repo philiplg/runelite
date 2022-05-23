@@ -116,7 +116,6 @@ public class MixinInjector extends AbstractInjector
 
 		for (Map.Entry<Provider<ClassFile>, List<ClassFile>> entry : mixinTargets.entrySet())
 		{
-			System.out.println(entry.getKey().get().getName());
 			injectFields(entry.getKey(), entry.getValue());
 		}
 
@@ -149,7 +148,6 @@ public class MixinInjector extends AbstractInjector
 		{
 			for (ClassFile mixinClass : inject.getMixins())
 			{
-				System.out.println(mixinClass.getName());
 				final List<ClassFile> ret = getMixins(mixinClass);
 				builder.put(
 					(ret.size() > 1 ? mixinProvider(mixinClass) : () -> mixinClass),
@@ -217,11 +215,19 @@ public class MixinInjector extends AbstractInjector
 						}
 					}
 
-					targetClass.addField(copy);
-
-					if (injectedFields.containsKey(field.getName()) && !ASSERTION_FIELD.equals(field.getName()))
+					if (targetClass.findField(field.getName(), field.getType()) != null && !ASSERTION_FIELD.equals(field.getName()))
 					{
 						throw new InjectException("Duplicate field: " + field.getName());
+					}
+
+					targetClass.addField(copy);
+
+					// We only need to save static fields in injected fields, cause only static fields can be shadowed
+					if (!field.isStatic())
+						continue;
+					if (injectedFields.containsKey(field.getName()) && !ASSERTION_FIELD.equals(field.getName()))
+					{
+						throw new InjectException("Duplicate static field: " + field.getName());
 					}
 
 					injectedFields.put(field.getName(), copy);
@@ -451,17 +457,22 @@ public class MixinInjector extends AbstractInjector
 						}
 					}*/
 
-					Method copy = new Method(targetClass, mixinMethod.getName(), mixinMethod.getDescriptor());
-					moveCode(copy, mixinMethod.getCode());
-					copy.setAccessFlags(mixinMethod.getAccessFlags());
-					copy.setPublic();
+					Method method = targetClass.findMethod(mixinMethod.getName(), mixinMethod.getDescriptor());
+
+					if (method == null)
+					{
+						method = new Method(targetClass, mixinMethod.getName(), mixinMethod.getDescriptor());
+						targetClass.addMethod(method);
+					}
+
+					moveCode(method, mixinMethod.getCode());
+					method.setAccessFlags(mixinMethod.getAccessFlags());
+					method.setPublic();
 					assert mixinMethod.getExceptions().getExceptions().isEmpty();
 
-					setOwnersToTargetClass(mixinClass, targetClass, copy, copiedMethods);
+					setOwnersToTargetClass(mixinClass, targetClass, method, copiedMethods);
 
-					targetClass.addMethod(copy);
-
-					log.debug("[DEBUG] Injected mixin method {} to {}", copy, targetClass);
+					log.debug("[DEBUG] Injected mixin method {} to {}", method, targetClass);
 					++injected;
 				}
 				else if (mixinMethod.findAnnotation(REPLACE) != null)

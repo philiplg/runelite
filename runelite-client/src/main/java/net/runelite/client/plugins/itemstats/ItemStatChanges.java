@@ -36,6 +36,7 @@ import net.runelite.client.plugins.itemstats.food.Anglerfish;
 import net.runelite.client.plugins.itemstats.potions.GauntletPotion;
 import net.runelite.client.plugins.itemstats.potions.PrayerPotion;
 import net.runelite.client.plugins.itemstats.potions.SaradominBrew;
+import net.runelite.client.plugins.itemstats.potions.StaminaPotion;
 import net.runelite.client.plugins.itemstats.potions.SuperRestore;
 import net.runelite.client.plugins.itemstats.special.CastleWarsBandage;
 import net.runelite.client.plugins.itemstats.special.SpicyStew;
@@ -91,6 +92,7 @@ public class ItemStatChanges
 		add(food(perc(.1, 1)), COOKED_SWEETCORN, SWEETCORN_7088 /* Bowl of cooked sweetcorn */);
 		add(combo(food(1), boost(DEFENCE, perc(.02, 1))), CABBAGE_1967 /* Draynor Manor */);
 		add(combo(2, food(8), heal(RUN_ENERGY, 5)), PAPAYA_FRUIT);
+		add(combo(2, food(3), boost(ATTACK, 3)), CUP_OF_TEA);
 		add(range(food(5), food(7)), THIN_SNAIL_MEAT);
 		add(range(food(7), food(9)), FAT_SNAIL_MEAT);
 		add(range(food(7), food(10)), SPIDER_ON_STICK_6297, SPIDER_ON_SHAFT_6299);
@@ -105,13 +107,35 @@ public class ItemStatChanges
 		add(food(10), EEL_SUSHI);
 
 		// Alcoholic Beverages
+		// Many of these retrieved from https://oldschool.runescape.wiki/w/Temporary_skill_drain
 		add(combo(food(11), dec(ATTACK, 2)), JUG_OF_WINE);
 		add(combo(food(14), dec(ATTACK, 3)), BOTTLE_OF_WINE);
-		add(combo(2, food(5), boost(STRENGTH, 6), heal(ATTACK, -4)), PREMADE_WIZ_BLZD, WIZARD_BLIZZARD);
-		add(combo(2, food(5), boost(STRENGTH, 4), heal(ATTACK, -3)), PREMADE_SGG, SHORT_GREEN_GUY);
-		add(combo(2, food(5), boost(STRENGTH, 7), heal(ATTACK, -4)), PREMADE_DR_DRAGON, DRUNK_DRAGON);
-		add(combo(2, food(5), boost(STRENGTH, 7), heal(ATTACK, -4)), PREMADE_CHOC_SDY, CHOC_SATURDAY);
+		add(combo(3, food(5), new SimpleStatBoost(STRENGTH, true, perc(.05, 1)), new BoostedStatBoost(ATTACK, false, perc(.02, -3))), PREMADE_SGG, SHORT_GREEN_GUY, BRANDY, GIN, VODKA, WHISKY);
+		add(combo(3, food(7), new SimpleStatBoost(STRENGTH, true, perc(.05, 2)), new BoostedStatBoost(ATTACK, false, perc(.02, -3))), PREMADE_BLURB_SP, BLURBERRY_SPECIAL);
+		add(combo(3, food(5), new SimpleStatBoost(STRENGTH, true, perc(.05, 2)), new BoostedStatBoost(ATTACK, false, perc(.02, -3))), PREMADE_DR_DRAGON, DRUNK_DRAGON, PREMADE_CHOC_SDY, CHOC_SATURDAY);
+		add(combo(3, food(5), new SimpleStatBoost(STRENGTH, true, perc(.06, 1)), new BoostedStatBoost(ATTACK, false, perc(.02, -3))), PREMADE_WIZ_BLZD, WIZARD_BLIZZARD);
+		add(combo(3, food(3), new SimpleStatBoost(STRENGTH, true, perc(.04, 1)), new BoostedStatBoost(ATTACK, false, perc(.05, -3))), GROG);
+		add(combo(3, food(1), boost(STRENGTH, perc(.02, 1)), new BoostedStatBoost(ATTACK, false, perc(.06, -1))), BEER, BEER_7740);
 		add(combo(4, boost(ATTACK, 5), boost(STRENGTH, 5), heal(MAGIC, -5), heal(PRAYER, -5)), BLOOD_PINT);
+		add(combo(3, food(1), boost(STRENGTH, 2), new BoostedStatBoost(ATTACK, false, perc(.05, -2))), ASGARNIAN_ALE, ASGARNIAN_ALE1, ASGARNIAN_ALE2, ASGARNIAN_ALE3, ASGARNIAN_ALE4, ASGARNIAN_ALE_7744);
+		add(combo(3, food(1), boost(STRENGTH, 3), new BoostedStatBoost(ATTACK, false, perc(.05, -3))), ASGARNIAN_ALEM, ASGARNIAN_ALEM1, ASGARNIAN_ALEM2, ASGARNIAN_ALEM3, ASGARNIAN_ALEM4);
+		add(combo(4, food(1), boost(WOODCUTTING, 1), new BoostedStatBoost(ATTACK, false, perc(.02, -2)), new BoostedStatBoost(STRENGTH, false, perc(.02, -2))), AXEMANS_FOLLY, AXEMANS_FOLLY1, AXEMANS_FOLLY2, AXEMANS_FOLLY3, AXEMANS_FOLLY4);
+		add(combo(4, food(2), boost(WOODCUTTING, 2), new BoostedStatBoost(ATTACK, false, perc(.02, -3)), new BoostedStatBoost(STRENGTH, false, perc(.02, -3))), AXEMANS_FOLLYM, AXEMANS_FOLLYM1, AXEMANS_FOLLYM2, AXEMANS_FOLLYM3, AXEMANS_FOLLYM4);
+		add(combo(5, food(1), boost(THIEVING, 1), boost(ATTACK, 1),  new BoostedStatBoost(DEFENCE, false, perc(.06, -3)), new BoostedStatBoost(STRENGTH, false, perc(.06, -3))), BANDITS_BREW);
+		add(combo(4, food(1), new SimpleStatBoost(COOKING, true, perc(.05, 1)), new BoostedStatBoost(ATTACK, false, perc(.05, -2)), new BoostedStatBoost(STRENGTH, false, perc(.05, -2))), CHEFS_DELIGHT, CHEFS_DELIGHT1, CHEFS_DELIGHT2, CHEFS_DELIGHT3, CHEFS_DELIGHT4, CHEFS_DELIGHT_7754);
+		add(combo(4, food(2), new SimpleStatBoost(COOKING, true, perc(.05, 2)), new BoostedStatBoost(ATTACK, false, perc(.05, -3)), new BoostedStatBoost(STRENGTH, false, perc(.05, -3))), CHEFS_DELIGHTM, CHEFS_DELIGHTM1, CHEFS_DELIGHTM2, CHEFS_DELIGHTM3, CHEFS_DELIGHTM4);
+		add(combo(4, food(1), boost(FARMING, 1), new BoostedStatBoost(ATTACK, false, perc(.02, -2)), new BoostedStatBoost(STRENGTH, false, perc(.02, -2))), CIDER, CIDER1, CIDER2, CIDER3, CIDER4, CIDER_7752);
+		add(combo(4, food(2), boost(FARMING, 2), new BoostedStatBoost(ATTACK, false, perc(.02, -3)), new BoostedStatBoost(STRENGTH, false, perc(.02, -3))), MATURE_CIDER, CIDERM1, CIDERM2, CIDERM3, CIDERM4);
+		add(combo(3, food(1), boost(STRENGTH, 2), new BoostedStatBoost(ATTACK, false, perc(.05, -2))), DRAGON_BITTER, DRAGON_BITTER1, DRAGON_BITTER2, DRAGON_BITTER3, DRAGON_BITTER4, DRAGON_BITTER_7748);
+		add(combo(3, food(2), boost(STRENGTH, 3), new BoostedStatBoost(ATTACK, false, perc(.05, -2))), DRAGON_BITTERM, DRAGON_BITTERM1, DRAGON_BITTERM2, DRAGON_BITTERM3, DRAGON_BITTERM4);
+		add(combo(6, food(1), boost(MINING, 1), boost(SMITHING, 1), new BoostedStatBoost(ATTACK, false, perc(.04, -2)), new BoostedStatBoost(DEFENCE, false, perc(.04, -2)), new BoostedStatBoost(STRENGTH, false, perc(.04, -2))), DWARVEN_STOUT, DWARVEN_STOUT1, DWARVEN_STOUT2, DWARVEN_STOUT3, DWARVEN_STOUT4);
+		add(combo(6, food(2), boost(MINING, 2), boost(SMITHING, 2), new BoostedStatBoost(ATTACK, false, perc(.04, -3)), new BoostedStatBoost(DEFENCE, false, perc(.04, -3)), new BoostedStatBoost(STRENGTH, false, perc(.04, -3))), DWARVEN_STOUTM, DWARVEN_STOUTM1, DWARVEN_STOUTM2, DWARVEN_STOUTM3, DWARVEN_STOUTM4);
+		add(combo(5, food(1), boost(HERBLORE, 1), new BoostedStatBoost(ATTACK, false, perc(.04, -2)), new BoostedStatBoost(DEFENCE, false, perc(.04, -2)), new BoostedStatBoost(STRENGTH, false, perc(.04, -2))), GREENMANS_ALE, GREENMANS_ALE1, GREENMANS_ALE2, GREENMANS_ALE3, GREENMANS_ALE4, GREENMANS_ALE_7746);
+		add(combo(5, food(2), boost(HERBLORE, 2), new BoostedStatBoost(ATTACK, false, perc(.04, -3)), new BoostedStatBoost(DEFENCE, false, perc(.04, -3)), new BoostedStatBoost(STRENGTH, false, perc(.04, -3))), GREENMANS_ALEM, GREENMANS_ALEM1, GREENMANS_ALEM2, GREENMANS_ALEM3, GREENMANS_ALEM4);
+		add(combo(5, food(1), boost(SLAYER, 2), new BoostedStatBoost(ATTACK, false, perc(.02, -2)), new BoostedStatBoost(DEFENCE, false, perc(.02, -2)), new BoostedStatBoost(STRENGTH, false, perc(.02, -2))), SLAYERS_RESPITE, SLAYERS_RESPITE1, SLAYERS_RESPITE2, SLAYERS_RESPITE3, SLAYERS_RESPITE4);
+		add(combo(5, food(2), boost(SLAYER, 4), new BoostedStatBoost(ATTACK, false, perc(.02, -3)), new BoostedStatBoost(DEFENCE, false, perc(.02, -3)), new BoostedStatBoost(STRENGTH, false, perc(.02, -3))), SLAYERS_RESPITEM, SLAYERS_RESPITEM1, SLAYERS_RESPITEM2, SLAYERS_RESPITEM3, SLAYERS_RESPITEM4);
+		add(combo(5, food(1), new SimpleStatBoost(MAGIC, true, perc(.02, 2)), new BoostedStatBoost(ATTACK, false, perc(.05, -1)), new BoostedStatBoost(DEFENCE, false, perc(.05, -1)), new BoostedStatBoost(STRENGTH, false, perc(.05, -1))), WIZARDS_MIND_BOMB, MIND_BOMB1, MIND_BOMB2, MIND_BOMB3, MIND_BOMB4);
+		add(combo(5, food(2), new SimpleStatBoost(MAGIC, true, perc(.02, 3)), new BoostedStatBoost(ATTACK, false, perc(.05, -2)), new BoostedStatBoost(DEFENCE, false, perc(.05, -2)), new BoostedStatBoost(STRENGTH, false, perc(.05, -2))), MATURE_WMB, MIND_BOMBM1, MIND_BOMBM2, MIND_BOMBM3, MIND_BOMBM4);
 
 		// Sq'irk Juice
 		add(heal(RUN_ENERGY, 5), WINTER_SQIRKJUICE);
@@ -160,7 +184,7 @@ public class ItemStatChanges
 		add(new SuperRestore(.25, 8), SUPER_RESTORE1, SUPER_RESTORE2, SUPER_RESTORE3, SUPER_RESTORE4,
 			BLIGHTED_SUPER_RESTORE1, BLIGHTED_SUPER_RESTORE2, BLIGHTED_SUPER_RESTORE3, BLIGHTED_SUPER_RESTORE4);
 		add(new SuperRestore(.30, 4), SANFEW_SERUM1, SANFEW_SERUM2, SANFEW_SERUM3, SANFEW_SERUM4);
-		add(heal(RUN_ENERGY, 20), STAMINA_POTION1, STAMINA_POTION2, STAMINA_POTION3, STAMINA_POTION4);
+		add(new StaminaPotion(), STAMINA_POTION1, STAMINA_POTION2, STAMINA_POTION3, STAMINA_POTION4);
 
 		// Raids potions (+)
 		add(combo(5, boost(ATTACK, perc(.16, 6)), boost(STRENGTH, perc(.16, 6)), boost(DEFENCE, perc(.16, 6)), boost(RANGED, perc(.16, 6)), boost(MAGIC, perc(.16, 6)), heal(HITPOINTS, -50)), OVERLOAD_1_20993, OVERLOAD_2_20994, OVERLOAD_3_20995, OVERLOAD_4_20996);
@@ -208,9 +232,10 @@ public class ItemStatChanges
 		add(combo(range(food(1), food(3)), heal(RUN_ENERGY, 10)), PURPLE_SWEETS_10476);
 		add(new SpicyStew(), SPICY_STEW);
 		add(boost(MAGIC, perc(.10, 1)), IMBUED_HEART);
-		add(combo(boost(ATTACK, 2), boost(STRENGTH, 1), heal(DEFENCE, -1)), JANGERBERRIES);
+		add(combo(boost(ATTACK, 2), boost(STRENGTH, 1), heal(PRAYER, 1), heal(DEFENCE, -1)), JANGERBERRIES);
 
 		// Gauntlet items
+		add(heal(HITPOINTS, 16), CRYSTAL_PADDLEFISH, CORRUPTED_PADDLEFISH);
 		add(heal(HITPOINTS, 20), PADDLEFISH);
 		add(new GauntletPotion(), EGNIOL_POTION_1, EGNIOL_POTION_2, EGNIOL_POTION_3, EGNIOL_POTION_4);
 

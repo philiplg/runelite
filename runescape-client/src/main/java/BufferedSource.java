@@ -7,166 +7,87 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("lm")
+@ObfuscatedName("np")
 @Implements("BufferedSource")
 public class BufferedSource implements Runnable {
-	@ObfuscatedName("f")
+	@ObfuscatedName("uf")
+	@ObfuscatedSignature(
+		descriptor = "Lbd;"
+	)
+	@Export("friendSystem")
+	public static FriendSystem friendSystem;
+	@ObfuscatedName("j")
+	@Export("userHomeDirectory")
+	static String userHomeDirectory;
+	@ObfuscatedName("o")
 	@Export("thread")
 	Thread thread;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@Export("inputStream")
 	InputStream inputStream;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = -1895389513
+		intValue = 1611590211
 	)
 	@Export("capacity")
 	int capacity;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@Export("buffer")
 	byte[] buffer;
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@ObfuscatedGetter(
-		intValue = 552004767
+		intValue = 1886855287
 	)
 	@Export("position")
 	int position;
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = 1147375927
+		intValue = 360959185
 	)
 	@Export("limit")
 	int limit;
-	@ObfuscatedName("k")
+	@ObfuscatedName("p")
 	@Export("exception")
 	IOException exception;
 
 	BufferedSource(InputStream var1, int var2) {
-		this.position = 0; // L: 59
-		this.limit = 0; // L: 60
-		this.inputStream = var1; // L: 64
-		this.capacity = var2 + 1; // L: 65
-		this.buffer = new byte[this.capacity]; // L: 66
-		this.thread = new Thread(this); // L: 67
-		this.thread.setDaemon(true); // L: 68
-		this.thread.start(); // L: 69
-	} // L: 70
-
-	@ObfuscatedName("f")
-	@ObfuscatedSignature(
-		descriptor = "(IB)Z",
-		garbageValue = "-36"
-	)
-	@Export("isAvailable")
-	boolean isAvailable(int var1) throws IOException {
-		if (var1 == 0) { // L: 106
-			return true;
-		} else if (var1 > 0 && var1 < this.capacity) { // L: 107
-			synchronized(this) { // L: 108
-				int var3;
-				if (this.position <= this.limit) { // L: 110
-					var3 = this.limit - this.position;
-				} else {
-					var3 = this.capacity - this.position + this.limit; // L: 111
-				}
-
-				if (var3 < var1) { // L: 112
-					if (this.exception != null) { // L: 113
-						throw new IOException(this.exception.toString());
-					} else {
-						this.notifyAll(); // L: 114
-						return false; // L: 115
-					}
-				} else {
-					return true; // L: 117
-				}
-			}
-		} else {
-			throw new IOException();
-		}
-	}
+		this.position = 0; // L: 66
+		this.limit = 0; // L: 67
+		this.inputStream = var1; // L: 71
+		this.capacity = var2 + 1; // L: 72
+		this.buffer = new byte[this.capacity]; // L: 73
+		this.thread = new Thread(this); // L: 74
+		this.thread.setDaemon(true); // L: 75
+		this.thread.start(); // L: 76
+	} // L: 77
 
 	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(B)I",
-		garbageValue = "-28"
+		descriptor = "(II)Z",
+		garbageValue = "-916314557"
 	)
-	@Export("available")
-	int available() throws IOException {
-		synchronized(this) { // L: 122
-			int var2;
-			if (this.position <= this.limit) { // L: 124
-				var2 = this.limit - this.position;
-			} else {
-				var2 = this.capacity - this.position + this.limit; // L: 125
-			}
-
-			if (var2 <= 0 && this.exception != null) { // L: 126
-				throw new IOException(this.exception.toString()); // L: 127
-			} else {
-				this.notifyAll(); // L: 129
-				return var2; // L: 130
-			}
-		}
-	}
-
-	@ObfuscatedName("u")
-	@ObfuscatedSignature(
-		descriptor = "(I)I",
-		garbageValue = "1857294674"
-	)
-	@Export("readUnsignedByte")
-	int readUnsignedByte() throws IOException {
-		synchronized(this) { // L: 135
-			if (this.position == this.limit) { // L: 136
-				if (this.exception != null) { // L: 137
-					throw new IOException(this.exception.toString());
+	@Export("isAvailable")
+	boolean isAvailable(int var1) throws IOException {
+		if (var1 == 0) { // L: 113
+			return true;
+		} else if (var1 > 0 && var1 < this.capacity) { // L: 114
+			synchronized(this) { // L: 115
+				int var3;
+				if (this.position <= this.limit) { // L: 117
+					var3 = this.limit - this.position;
 				} else {
-					return -1; // L: 138
-				}
-			} else {
-				int var2 = this.buffer[this.position] & 255; // L: 140
-				this.position = (this.position + 1) % this.capacity; // L: 141
-				this.notifyAll(); // L: 142
-				return var2; // L: 143
-			}
-		}
-	}
-
-	@ObfuscatedName("p")
-	@ObfuscatedSignature(
-		descriptor = "([BIIB)I",
-		garbageValue = "123"
-	)
-	@Export("read")
-	int read(byte[] var1, int var2, int var3) throws IOException {
-		if (var3 >= 0 && var2 >= 0 && var3 + var2 <= var1.length) { // L: 148
-			synchronized(this) { // L: 149
-				int var5;
-				if (this.position <= this.limit) { // L: 151
-					var5 = this.limit - this.position;
-				} else {
-					var5 = this.capacity - this.position + this.limit; // L: 152
+					var3 = this.capacity - this.position + this.limit; // L: 118
 				}
 
-				if (var3 > var5) { // L: 153
-					var3 = var5;
-				}
-
-				if (var3 == 0 && this.exception != null) { // L: 154
-					throw new IOException(this.exception.toString());
-				} else {
-					if (var3 + this.position <= this.capacity) { // L: 155
-						System.arraycopy(this.buffer, this.position, var1, var2, var3); // L: 156
+				if (var3 < var1) { // L: 119
+					if (this.exception != null) { // L: 120
+						throw new IOException(this.exception.toString());
 					} else {
-						int var6 = this.capacity - this.position; // L: 159
-						System.arraycopy(this.buffer, this.position, var1, var2, var6); // L: 160
-						System.arraycopy(this.buffer, 0, var1, var6 + var2, var3 - var6); // L: 161
+						this.notifyAll(); // L: 121
+						return false; // L: 122
 					}
-
-					this.position = (var3 + this.position) % this.capacity; // L: 163
-					this.notifyAll(); // L: 164
-					return var3; // L: 165
+				} else {
+					return true; // L: 124
 				}
 			}
 		} else {
@@ -174,130 +95,196 @@ public class BufferedSource implements Runnable {
 		}
 	}
 
-	@ObfuscatedName("b")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(B)V",
-		garbageValue = "-28"
+		descriptor = "(I)I",
+		garbageValue = "377483853"
+	)
+	@Export("available")
+	int available() throws IOException {
+		synchronized(this) { // L: 129
+			int var2;
+			if (this.position <= this.limit) { // L: 131
+				var2 = this.limit - this.position;
+			} else {
+				var2 = this.capacity - this.position + this.limit; // L: 132
+			}
+
+			if (var2 <= 0 && this.exception != null) { // L: 133
+				throw new IOException(this.exception.toString()); // L: 134
+			} else {
+				this.notifyAll(); // L: 136
+				return var2; // L: 137
+			}
+		}
+	}
+
+	@ObfuscatedName("l")
+	@ObfuscatedSignature(
+		descriptor = "(B)I",
+		garbageValue = "-18"
+	)
+	@Export("readUnsignedByte")
+	int readUnsignedByte() throws IOException {
+		synchronized(this) { // L: 142
+			if (this.limit == this.position) { // L: 143
+				if (this.exception != null) { // L: 144
+					throw new IOException(this.exception.toString());
+				} else {
+					return -1; // L: 145
+				}
+			} else {
+				int var2 = this.buffer[this.position] & 255; // L: 147
+				this.position = (this.position + 1) % this.capacity; // L: 148
+				this.notifyAll(); // L: 149
+				return var2; // L: 150
+			}
+		}
+	}
+
+	@ObfuscatedName("k")
+	@ObfuscatedSignature(
+		descriptor = "([BIII)I",
+		garbageValue = "-720858367"
+	)
+	@Export("read")
+	int read(byte[] var1, int var2, int var3) throws IOException {
+		if (var3 >= 0 && var2 >= 0 && var3 + var2 <= var1.length) { // L: 155
+			synchronized(this) { // L: 156
+				int var5;
+				if (this.position <= this.limit) { // L: 158
+					var5 = this.limit - this.position;
+				} else {
+					var5 = this.capacity - this.position + this.limit; // L: 159
+				}
+
+				if (var3 > var5) { // L: 160
+					var3 = var5;
+				}
+
+				if (var3 == 0 && this.exception != null) { // L: 161
+					throw new IOException(this.exception.toString());
+				} else {
+					if (var3 + this.position <= this.capacity) { // L: 162
+						System.arraycopy(this.buffer, this.position, var1, var2, var3); // L: 163
+					} else {
+						int var6 = this.capacity - this.position; // L: 166
+						System.arraycopy(this.buffer, this.position, var1, var2, var6); // L: 167
+						System.arraycopy(this.buffer, 0, var1, var6 + var2, var3 - var6); // L: 168
+					}
+
+					this.position = (var3 + this.position) % this.capacity; // L: 170
+					this.notifyAll(); // L: 171
+					return var3; // L: 172
+				}
+			}
+		} else {
+			throw new IOException();
+		}
+	}
+
+	@ObfuscatedName("a")
+	@ObfuscatedSignature(
+		descriptor = "(I)V",
+		garbageValue = "-1309478376"
 	)
 	@Export("close")
 	void close() {
-		synchronized(this) { // L: 170
+		synchronized(this) { // L: 177
 			if (this.exception == null) {
-				this.exception = new IOException(""); // L: 171
+				this.exception = new IOException(""); // L: 178
 			}
 
-			this.notifyAll(); // L: 172
+			this.notifyAll(); // L: 179
 		}
 
 		try {
-			this.thread.join(); // L: 175
-		} catch (InterruptedException var3) { // L: 177
+			this.thread.join(); // L: 182
+		} catch (InterruptedException var3) { // L: 184
 		}
 
-	} // L: 178
+	} // L: 185
 
 	public void run() {
 		while (true) {
 			int var1;
-			synchronized(this) { // L: 75
+			synchronized(this) { // L: 82
 				while (true) {
-					if (this.exception != null) { // L: 77
+					if (this.exception != null) { // L: 84
 						return;
 					}
 
-					if (this.position == 0) { // L: 78
+					if (this.position == 0) { // L: 85
 						var1 = this.capacity - this.limit - 1;
-					} else if (this.position <= this.limit) { // L: 79
+					} else if (this.position <= this.limit) { // L: 86
 						var1 = this.capacity - this.limit;
 					} else {
-						var1 = this.position - this.limit - 1; // L: 80
+						var1 = this.position - this.limit - 1; // L: 87
 					}
 
-					if (var1 > 0) { // L: 81
+					if (var1 > 0) { // L: 88
 						break;
 					}
 
 					try {
-						this.wait(); // L: 83
-					} catch (InterruptedException var10) { // L: 85
+						this.wait(); // L: 90
+					} catch (InterruptedException var10) { // L: 92
 					}
 				}
 			}
 
 			int var7;
 			try {
-				var7 = this.inputStream.read(this.buffer, this.limit, var1); // L: 90
+				var7 = this.inputStream.read(this.buffer, this.limit, var1); // L: 97
 				if (var7 == -1) {
-					throw new EOFException(); // L: 91
+					throw new EOFException(); // L: 98
 				}
-			} catch (IOException var11) { // L: 93
+			} catch (IOException var11) { // L: 100
 				IOException var3 = var11;
-				synchronized(this) { // L: 94
-					this.exception = var3; // L: 95
-					return; // L: 96
+				synchronized(this) { // L: 101
+					this.exception = var3; // L: 102
+					return; // L: 103
 				}
 			}
 
-			synchronized(this) { // L: 99
-				this.limit = (var7 + this.limit) % this.capacity; // L: 100
-			} // L: 101
+			synchronized(this) { // L: 106
+				this.limit = (var7 + this.limit) % this.capacity; // L: 107
+			} // L: 108
 		}
 	}
 
 	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "([BILjava/lang/CharSequence;I)I",
-		garbageValue = "689227004"
+		descriptor = "(CI)Z",
+		garbageValue = "-1918735565"
 	)
-	public static int method5917(byte[] var0, int var1, CharSequence var2) {
-		int var3 = var2.length(); // L: 21
-		int var4 = var1; // L: 22
+	static final boolean method6702(char var0) {
+		if (Character.isISOControl(var0)) { // L: 16
+			return false;
+		} else if (class78.isAlphaNumeric(var0)) { // L: 17
+			return true;
+		} else {
+			char[] var1 = class424.field4621; // L: 19
 
-		for (int var5 = 0; var5 < var3; ++var5) { // L: 23
-			char var6 = var2.charAt(var5); // L: 24
-			if (var6 <= 127) { // L: 25
-				var0[var4++] = (byte)var6; // L: 26
-			} else if (var6 <= 2047) { // L: 28
-				var0[var4++] = (byte)(192 | var6 >> 6); // L: 29
-				var0[var4++] = (byte)(128 | var6 & '?'); // L: 30
-			} else {
-				var0[var4++] = (byte)(224 | var6 >> '\f'); // L: 33
-				var0[var4++] = (byte)(128 | var6 >> 6 & 63); // L: 34
-				var0[var4++] = (byte)(128 | var6 & '?'); // L: 35
+			int var2;
+			char var3;
+			for (var2 = 0; var2 < var1.length; ++var2) { // L: 20
+				var3 = var1[var2]; // L: 21
+				if (var0 == var3) { // L: 22
+					return true;
+				}
 			}
-		}
 
-		return var4 - var1; // L: 38
+			var1 = class424.field4623; // L: 26
+
+			for (var2 = 0; var2 < var1.length; ++var2) { // L: 27
+				var3 = var1[var2]; // L: 28
+				if (var0 == var3) { // L: 29
+					return true;
+				}
+			}
+
+			return false; // L: 32
+		}
 	}
-
-	@ObfuscatedName("hh")
-	@ObfuscatedSignature(
-		descriptor = "(I)V",
-		garbageValue = "519434496"
-	)
-	static final void method5918() {
-		int var0 = class16.menuX; // L: 7792
-		int var1 = FontName.menuY; // L: 7793
-		int var2 = Player.menuWidth; // L: 7794
-		int var3 = class11.menuHeight; // L: 7795
-		int var4 = 6116423; // L: 7796
-		Rasterizer2D.Rasterizer2D_fillRectangle(var0, var1, var2, var3, var4); // L: 7797
-		Rasterizer2D.Rasterizer2D_fillRectangle(var0 + 1, var1 + 1, var2 - 2, 16, 0); // L: 7798
-		Rasterizer2D.Rasterizer2D_drawRectangle(var0 + 1, var1 + 18, var2 - 2, var3 - 19, 0); // L: 7799
-		class368.fontBold12.draw("Choose Option", var0 + 3, var1 + 14, var4, -1); // L: 7800
-		int var5 = MouseHandler.MouseHandler_x; // L: 7801
-		int var6 = MouseHandler.MouseHandler_y; // L: 7802
-
-		for (int var7 = 0; var7 < Client.menuOptionsCount; ++var7) { // L: 7803
-			int var8 = var1 + (Client.menuOptionsCount - 1 - var7) * 15 + 31; // L: 7804
-			int var9 = 16777215; // L: 7805
-			if (var5 > var0 && var5 < var0 + var2 && var6 > var8 - 13 && var6 < var8 + 3) { // L: 7806
-				var9 = 16776960;
-			}
-
-			class368.fontBold12.draw(class69.method1164(var7), var0 + 3, var8, var9, 0); // L: 7807
-		}
-
-		LoginScreenAnimation.method2198(class16.menuX, FontName.menuY, Player.menuWidth, class11.menuHeight); // L: 7809
-	} // L: 7810
 }

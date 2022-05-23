@@ -1,103 +1,142 @@
+import java.io.File;
+import java.io.RandomAccessFile;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("je")
+@ObfuscatedName("fi")
 @Implements("VarpDefinition")
 public class VarpDefinition extends DualNode {
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "Lir;"
+		descriptor = "Llp;"
 	)
 	@Export("VarpDefinition_archive")
-	static AbstractArchive VarpDefinition_archive;
-	@ObfuscatedName("o")
+	public static AbstractArchive VarpDefinition_archive;
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -1381184627
+		intValue = -230043691
 	)
 	@Export("VarpDefinition_fileCount")
 	public static int VarpDefinition_fileCount;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "Lgf;"
+		descriptor = "Lir;"
 	)
 	@Export("VarpDefinition_cached")
 	public static EvictingDualNodeHashTable VarpDefinition_cached;
-	@ObfuscatedName("p")
+	@ObfuscatedName("ex")
+	@ObfuscatedSignature(
+		descriptor = "Lle;"
+	)
+	@Export("archive19")
+	static Archive archive19;
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = 1440962611
+		intValue = 1780230935
 	)
 	@Export("type")
 	public int type;
 
 	static {
-		VarpDefinition_cached = new EvictingDualNodeHashTable(64); // L: 12
+		VarpDefinition_cached = new EvictingDualNodeHashTable(64);
 	}
 
 	VarpDefinition() {
 		this.type = 0; // L: 13
 	} // L: 15
 
-	@ObfuscatedName("u")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(Lnu;I)V",
-		garbageValue = "923214413"
+		descriptor = "(Lpx;B)V",
+		garbageValue = "-125"
 	)
 	@Export("decode")
 	void decode(Buffer var1) {
 		while (true) {
-			int var2 = var1.readUnsignedByte(); // L: 34
-			if (var2 == 0) { // L: 35
-				return; // L: 38
+			int var2 = var1.readUnsignedByte();
+			if (var2 == 0) {
+				return; // L: 33
 			}
 
-			this.decodeNext(var1, var2); // L: 36
+			this.decodeNext(var1, var2);
 		}
 	}
 
-	@ObfuscatedName("p")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "(Lnu;II)V",
-		garbageValue = "1336556891"
+		descriptor = "(Lpx;IB)V",
+		garbageValue = "29"
 	)
 	@Export("decodeNext")
 	void decodeNext(Buffer var1, int var2) {
-		if (var2 == 5) { // L: 41
+		if (var2 == 5) {
 			this.type = var1.readUnsignedShort();
 		}
 
-	} // L: 43
+	} // L: 38
 
-	@ObfuscatedName("aa")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(ILcc;ZB)I",
-		garbageValue = "47"
+		descriptor = "(Ljava/lang/String;I)Ljava/io/File;",
+		garbageValue = "1012009903"
 	)
-	static int method4898(int var0, Script var1, boolean var2) {
-		if (var0 == 7100) { // L: 4212
-			++class16.Interpreter_intStackSize; // L: 4213
-			return 1; // L: 4214
-		} else if (var0 == 7101) { // L: 4216
-			Interpreter.Interpreter_stringStackSize += 2; // L: 4217
-			return 1; // L: 4218
-		} else if (var0 != 7102 && var0 != 7103 && var0 != 7104 && var0 != 7105 && var0 != 7109) { // L: 4220
-			if (var0 == 7106) { // L: 4224
-				++class16.Interpreter_intStackSize; // L: 4225
-				return 1; // L: 4226
-			} else if (var0 == 7107) { // L: 4228
-				++class16.Interpreter_intStackSize; // L: 4229
-				return 1; // L: 4230
-			} else if (var0 == 7108) { // L: 4232
-				Interpreter.Interpreter_intStack[++class16.Interpreter_intStackSize - 1] = Huffman.method4311() ? 1 : 0; // L: 4233
-				return 1; // L: 4234
-			} else {
-				return 2; // L: 4236
-			}
+	@Export("getFile")
+	static File getFile(String var0) {
+		if (!FileSystem.FileSystem_hasPermissions) { // L: 16
+			throw new RuntimeException("");
 		} else {
-			++class16.Interpreter_intStackSize; // L: 4221
-			return 1; // L: 4222
+			File var1 = (File)FileSystem.FileSystem_cacheFiles.get(var0); // L: 17
+			if (var1 != null) { // L: 18
+				return var1;
+			} else {
+				File var2 = new File(FileSystem.FileSystem_cacheDir, var0); // L: 19
+				RandomAccessFile var3 = null; // L: 20
+
+				try {
+					File var4 = new File(var2.getParent()); // L: 22
+					if (!var4.exists()) { // L: 23
+						throw new RuntimeException("");
+					} else {
+						var3 = new RandomAccessFile(var2, "rw"); // L: 24
+						int var5 = var3.read(); // L: 25
+						var3.seek(0L); // L: 26
+						var3.write(var5); // L: 27
+						var3.seek(0L); // L: 28
+						var3.close(); // L: 29
+						FileSystem.FileSystem_cacheFiles.put(var0, var2); // L: 30
+						return var2; // L: 31
+					}
+				} catch (Exception var8) {
+					try {
+						if (var3 != null) { // L: 35
+							var3.close(); // L: 36
+							var3 = null; // L: 37
+						}
+					} catch (Exception var7) { // L: 40
+					}
+
+					throw new RuntimeException(); // L: 42
+				}
+			}
+		}
+	}
+
+	@ObfuscatedName("o")
+	@ObfuscatedSignature(
+		descriptor = "(IIII)I",
+		garbageValue = "-1753178254"
+	)
+	public static int method3273(int var0, int var1, int var2) {
+		var2 &= 3; // L: 9
+		if (var2 == 0) { // L: 10
+			return var1;
+		} else if (var2 == 1) { // L: 11
+			return 7 - var0;
+		} else {
+			return var2 == 2 ? 7 - var1 : var0; // L: 12
 		}
 	}
 }

@@ -98,6 +98,14 @@ public interface RSActor extends RSRenderable, Actor
 	@Override
 	void setGraphic(int id);
 
+	@Import("spotAnimationHeight")
+	@Override
+	int getGraphicHeight();
+
+	@Import("spotAnimationHeight")
+	@Override
+	void setGraphicHeight(int id);
+
 	@Import("spotAnimationFrame")
 	int getSpotAnimFrame();
 
@@ -167,32 +175,66 @@ public interface RSActor extends RSRenderable, Actor
 	@Override
 	int getIdleRotateLeft();
 
+	@Import("turnLeftSequence")
+	@Override
+	void setIdleRotateLeft(int id);
+
 	@Import("turnRightSequence")
 	@Override
 	int getIdleRotateRight();
+
+	@Import("turnRightSequence")
+	@Override
+	void setIdleRotateRight(int id);
 
 	@Import("walkSequence")
 	@Override
 	int getWalkAnimation();
 
+	@Import("walkSequence")
+	@Override
+	void setWalkAnimation(int id);
+
 	@Import("walkBackSequence")
 	@Override
 	int getWalkRotate180();
+
+	@Import("walkBackSequence")
+	@Override
+	void setWalkRotate180(int id);
 
 	@Import("walkLeftSequence")
 	@Override
 	int getWalkRotateLeft();
 
+	@Import("walkLeftSequence")
+	@Override
+	void setWalkRotateLeft(int id);
+
 	@Import("walkRightSequence")
 	@Override
 	int getWalkRotateRight();
+
+	@Import("walkRightSequence")
+	@Override
+	void setWalkRotateRight(int id);
 
 	@Import("runSequence")
 	@Override
 	int getRunAnimation();
 
+	@Import("runSequence")
+	@Override
+	void setRunAnimation(int id);
+
 	void setDead(boolean dead);
 
 	@Import("pathLength")
 	int getPathLength();
+
+	@Import("overheadTextCyclesRemaining")
+	int getOverheadCycle();
+
+	@Import("overheadTextCyclesRemaining")
+	void setOverheadCycle(int cycle);
 }

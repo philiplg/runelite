@@ -28,6 +28,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.openosrs.client.game.ItemReclaimCost;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -42,7 +43,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -53,17 +54,12 @@ import net.runelite.api.GameState;
 import net.runelite.api.ItemComposition;
 import static net.runelite.api.ItemID.*;
 import net.runelite.api.SpritePixels;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.PostItemComposition;
+import net.runelite.api.widgets.ItemQuantityMode;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.RuneLiteConfig;
-import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.http.api.item.ItemClient;
 import net.runelite.http.api.item.ItemPrice;
 import net.runelite.http.api.item.ItemStats;
-import okhttp3.OkHttpClient;
 
 @Singleton
 @Slf4j
@@ -90,10 +86,17 @@ public class ItemManager
 	private final ItemClient itemClient;
 	private final RuneLiteConfig runeLiteConfig;
 
+	@Inject(optional = true)
+	@Named("activePriceThreshold")
+	private double activePriceThreshold = 5;
+
+	@Inject(optional = true)
+	@Named("lowPriceThreshold")
+	private int lowPriceThreshold = 1000;
+
 	private Map<Integer, ItemPrice> itemPrices = Collections.emptyMap();
 	private Map<Integer, ItemStats> itemStats = Collections.emptyMap();
 	private final LoadingCache<ImageKey, AsyncBufferedImage> itemImages;
-	private final LoadingCache<Integer, ItemComposition> itemCompositions;
 	private final LoadingCache<OutlineKey, BufferedImage> itemOutlines;
 
 	// Worn items with weight reducing property have a different worn and inventory ItemID
@@ -173,11 +176,11 @@ public class ItemManager
 
 	@Inject
 	public ItemManager(Client client, ScheduledExecutorService scheduledExecutorService, ClientThread clientThread,
-		OkHttpClient okHttpClient, EventBus eventBus, RuneLiteConfig runeLiteConfig)
+						ItemClient itemClient, RuneLiteConfig runeLiteConfig)
 	{
 		this.client = client;
 		this.clientThread = clientThread;
-		this.itemClient = new ItemClient(okHttpClient);
+		this.itemClient = itemClient;
 		this.runeLiteConfig = runeLiteConfig;
 
 		scheduledExecutorService.scheduleWithFixedDelay(this::loadPrices, 0, 30, TimeUnit.MINUTES);
@@ -195,18 +198,6 @@ public class ItemManager
 				}
 			});
 
-		itemCompositions = CacheBuilder.newBuilder()
-			.maximumSize(1024L)
-			.expireAfterAccess(1, TimeUnit.HOURS)
-			.build(new CacheLoader<Integer, ItemComposition>()
-			{
-				@Override
-				public ItemComposition load(Integer key) throws Exception
-				{
-					return client.getItemComposition(key);
-				}
-			});
-
 		itemOutlines = CacheBuilder.newBuilder()
 			.maximumSize(128L)
 			.expireAfterAccess(1, TimeUnit.HOURS)
@@ -218,8 +209,6 @@ public class ItemManager
 					return loadItemOutline(key.itemId, key.itemQuantity, key.outlineColor);
 				}
 			});
-
-		eventBus.register(this);
 	}
 
 	private void loadPrices()
@@ -263,31 +252,6 @@ public class ItemManager
 		}
 	}
 
-
-	@Subscribe
-	public void onGameStateChanged(final GameStateChanged event)
-	{
-		if (event.getGameState() == GameState.HOPPING || event.getGameState() == GameState.LOGIN_SCREEN)
-		{
-			itemCompositions.invalidateAll();
-		}
-	}
-
-	@Subscribe
-	public void onPostItemComposition(PostItemComposition event)
-	{
-		itemCompositions.put(event.getItemComposition().getId(), event.getItemComposition());
-	}
-
-	/**
-	 * Invalidates internal item manager item composition cache (but not client item composition cache)
-	 * @see Client#getItemCompositionCache()
-	 */
-	public void invalidateItemCompositionCache()
-	{
-		itemCompositions.invalidateAll();
-	}
-
 	/**
 	 * Look up an item's price
 	 *
@@ -302,7 +266,7 @@ public class ItemManager
 	/**
 	 * Look up an item's price
 	 *
-	 * @param itemID item id
+	 * @param itemID       item id
 	 * @param useWikiPrice use the actively traded/wiki price
 	 * @return item price
 	 */
@@ -334,7 +298,7 @@ public class ItemManager
 
 			if (ip != null)
 			{
-				price = useWikiPrice && ip.getWikiPrice() > 0 ? ip.getWikiPrice() : ip.getPrice();
+				price = useWikiPrice ? getWikiPrice(ip) : ip.getPrice();
 			}
 		}
 		else
@@ -384,7 +348,29 @@ public class ItemManager
 	}
 
 	/**
+	 * Get the wiki price for an item, with checks to try and avoid excessive price manipulation
+	 *
+	 * @param itemPrice
+	 * @return
+	 */
+	public int getWikiPrice(ItemPrice itemPrice)
+	{
+		final int wikiPrice = itemPrice.getWikiPrice();
+		final int jagPrice = itemPrice.getPrice();
+		if (wikiPrice <= 0)
+		{
+			return jagPrice;
+		}
+		if (wikiPrice <= lowPriceThreshold)
+		{
+			return wikiPrice;
+		}
+		return wikiPrice < jagPrice * activePriceThreshold ? wikiPrice : jagPrice;
+	}
+
+	/**
 	 * Look up an item's stats
+	 *
 	 * @param itemId item id
 	 * @return item stats
 	 */
@@ -432,8 +418,7 @@ public class ItemManager
 	@Nonnull
 	public ItemComposition getItemComposition(int itemId)
 	{
-		assert client.isClientThread() : "getItemComposition must be called on client thread";
-		return itemCompositions.getUnchecked(itemId);
+		return client.getItemDefinition(itemId);
 	}
 
 	/**
@@ -472,7 +457,7 @@ public class ItemManager
 				return false;
 			}
 			SpritePixels sprite = client.createItemSprite(itemId, quantity, 1, SpritePixels.DEFAULT_SHADOW_COLOR,
-				stackable ? 1 : 0, false, CLIENT_DEFAULT_ZOOM);
+				stackable ? ItemQuantityMode.ALWAYS : ItemQuantityMode.NEVER, false, CLIENT_DEFAULT_ZOOM);
 			if (sprite == null)
 			{
 				return false;
@@ -525,7 +510,7 @@ public class ItemManager
 	/**
 	 * Create item sprite and applies an outline.
 	 *
-	 * @param itemId item id
+	 * @param itemId       item id
 	 * @param itemQuantity item quantity
 	 * @param outlineColor outline color
 	 * @return image
@@ -539,7 +524,7 @@ public class ItemManager
 	/**
 	 * Get item outline with a specific color.
 	 *
-	 * @param itemId item id
+	 * @param itemId       item id
 	 * @param itemQuantity item quantity
 	 * @param outlineColor outline color
 	 * @return image

@@ -1,128 +1,76 @@
-import java.io.File;
 import java.io.IOException;
-import net.runelite.mapping.Export;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.security.SecureRandom;
+import java.security.Security;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
+import org.bouncycastle.crypto.tls.TlsClientProtocol;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-@ObfuscatedName("r")
-public class class15 extends class14 {
-	@ObfuscatedName("gu")
-	@Export("regionLandArchives")
-	static byte[][] regionLandArchives;
-	@ObfuscatedName("f")
-	String field128;
-	// $FF: synthetic field
-	@ObfuscatedSignature(
-		descriptor = "Lu;"
-	)
-	final class2 this$0;
+@ObfuscatedName("g")
+public class class15 extends SSLSocketFactory {
+	@ObfuscatedName("o")
+	SecureRandom field78;
 
-	@ObfuscatedSignature(
-		descriptor = "(Lu;)V"
-	)
-	class15(class2 var1) {
-		this.this$0 = var1; // L: 229
+	static {
+		if (Security.getProvider("BC") == null) { // L: 40
+			Security.addProvider(new BouncyCastleProvider());
+		}
+
+	} // L: 41
+
+	public class15() {
+		this.field78 = new SecureRandom(); // L: 43
 	}
-
-	@ObfuscatedName("f")
-	@ObfuscatedSignature(
-		descriptor = "(Lnu;I)V",
-		garbageValue = "-1383981708"
-	)
-	void vmethod371(Buffer var1) {
-		this.field128 = var1.readStringCp1252NullTerminated(); // L: 232
-		var1.readInt(); // L: 233
-	} // L: 234
 
 	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(Lm;I)V",
-		garbageValue = "-1475503816"
+		descriptor = "(Ljava/lang/String;Lorg/bouncycastle/crypto/tls/TlsClientProtocol;I)Ljavax/net/ssl/SSLSocket;",
+		garbageValue = "-2042805034"
 	)
-	void vmethod376(class11 var1) {
-		var1.field81 = this.field128; // L: 237
-	} // L: 238
-
-	@ObfuscatedName("u")
-	@ObfuscatedSignature(
-		descriptor = "(II)Z",
-		garbageValue = "-1672620512"
-	)
-	@Export("loadInterface")
-	public static boolean loadInterface(int var0) {
-		if (class69.Widget_loadedInterfaces[var0]) { // L: 205
-			return true;
-		} else if (!FloorDecoration.Widget_archive.tryLoadGroup(var0)) { // L: 206
-			return false;
-		} else {
-			int var1 = FloorDecoration.Widget_archive.getGroupFileCount(var0); // L: 207
-			if (var1 == 0) { // L: 208
-				class69.Widget_loadedInterfaces[var0] = true; // L: 209
-				return true; // L: 210
-			} else {
-				if (Widget.Widget_interfaceComponents[var0] == null) { // L: 212
-					Widget.Widget_interfaceComponents[var0] = new Widget[var1];
-				}
-
-				for (int var2 = 0; var2 < var1; ++var2) { // L: 213
-					if (Widget.Widget_interfaceComponents[var0][var2] == null) { // L: 214
-						byte[] var3 = FloorDecoration.Widget_archive.takeFile(var0, var2); // L: 215
-						if (var3 != null) { // L: 216
-							Widget.Widget_interfaceComponents[var0][var2] = new Widget(); // L: 217
-							Widget.Widget_interfaceComponents[var0][var2].id = var2 + (var0 << 16); // L: 218
-							if (var3[0] == -1) { // L: 219
-								Widget.Widget_interfaceComponents[var0][var2].decode(new Buffer(var3));
-							} else {
-								Widget.Widget_interfaceComponents[var0][var2].decodeLegacy(new Buffer(var3)); // L: 220
-							}
-						}
-					}
-				}
-
-				class69.Widget_loadedInterfaces[var0] = true; // L: 224
-				return true; // L: 225
-			}
-		}
+	SSLSocket method169(String var1, TlsClientProtocol var2) {
+		return new class12(this, var2, var1); // L: 88
 	}
 
-	@ObfuscatedName("p")
-	@ObfuscatedSignature(
-		descriptor = "(Ljava/lang/String;Ljava/lang/String;ZI)Lni;",
-		garbageValue = "1945002537"
-	)
-	@Export("getPreferencesFile")
-	public static AccessFile getPreferencesFile(String var0, String var1, boolean var2) {
-		File var3 = new File(JagexCache.cacheDir, "preferences" + var0 + ".dat"); // L: 247
-		if (var3.exists()) { // L: 248
-			try {
-				AccessFile var10 = new AccessFile(var3, "rw", 10000L); // L: 250
-				return var10; // L: 251
-			} catch (IOException var9) { // L: 253
-			}
+	public Socket createSocket(Socket var1, String var2, int var3, boolean var4) throws IOException {
+		if (var1 == null) { // L: 47
+			var1 = new Socket(); // L: 48
 		}
 
-		String var4 = ""; // L: 255
-		if (class20.cacheGamebuild == 33) { // L: 256
-			var4 = "_rc";
-		} else if (class20.cacheGamebuild == 34) { // L: 257
-			var4 = "_wip";
+		if (!var1.isConnected()) { // L: 50
+			var1.connect(new InetSocketAddress(var2, var3)); // L: 51
 		}
 
-		File var5 = new File(Canvas.userHomeDirectory, "jagex_" + var1 + "_preferences" + var0 + var4 + ".dat"); // L: 258
-		AccessFile var6;
-		if (!var2 && var5.exists()) { // L: 259
-			try {
-				var6 = new AccessFile(var5, "rw", 10000L); // L: 261
-				return var6; // L: 262
-			} catch (IOException var8) { // L: 264
-			}
-		}
+		TlsClientProtocol var5 = new TlsClientProtocol(var1.getInputStream(), var1.getOutputStream(), this.field78); // L: 53
+		return this.method169(var2, var5); // L: 54
+	}
 
-		try {
-			var6 = new AccessFile(var3, "rw", 10000L); // L: 267
-			return var6; // L: 268
-		} catch (IOException var7) { // L: 270
-			throw new RuntimeException(); // L: 271
-		}
+	public String[] getDefaultCipherSuites() {
+		return null; // L: 59
+	}
+
+	public String[] getSupportedCipherSuites() {
+		return null; // L: 64
+	}
+
+	public Socket createSocket(String var1, int var2) throws IOException, UnknownHostException {
+		return null; // L: 69
+	}
+
+	public Socket createSocket(String var1, int var2, InetAddress var3, int var4) throws IOException, UnknownHostException {
+		return null; // L: 79
+	}
+
+	public Socket createSocket(InetAddress var1, int var2) throws IOException {
+		return null; // L: 74
+	}
+
+	public Socket createSocket(InetAddress var1, int var2, InetAddress var3, int var4) throws IOException {
+		return null; // L: 84
 	}
 }

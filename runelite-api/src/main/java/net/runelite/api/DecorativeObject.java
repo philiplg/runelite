@@ -35,7 +35,7 @@ public interface DecorativeObject extends TileObject
 	 * Gets the convex hull of the objects model.
 	 *
 	 * @return the convex hull
-	 * @see api.model.Jarvis
+	 * @see net.runelite.api.model.Jarvis
 	 */
 	Shape getConvexHull();
 	Shape getConvexHull2();
@@ -43,13 +43,25 @@ public interface DecorativeObject extends TileObject
 	Renderable getRenderable();
 	Renderable getRenderable2();
 
-	Model getModel1();
-
-	Model getModel2();
-
-	int getYOffset();
-
+	/**
+	 * Decorative object x offset. This is added to the x position of the object, and is used to
+	 * account for walls of varying widths.
+	 */
 	int getXOffset();
 
-	int getOrientation();
+	/**
+	 * Decorative object y offset. This is added to the z position of the object, and is used to
+	 * account for walls of varying widths.
+	 */
+	int getYOffset();
+
+	/**
+	 * A bitfield containing various flags:
+	 * <pre>{@code
+	 * object type id = bits & 0x20
+	 * orientation (0-3) = bits >>> 6 & 3
+	 * supports items = bits >>> 8 & 1
+	 * }</pre>
+	 */
+	int getConfig();
 }

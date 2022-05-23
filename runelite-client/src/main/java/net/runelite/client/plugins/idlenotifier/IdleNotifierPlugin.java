@@ -60,7 +60,8 @@ import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
 	name = "Idle Notifier",
 	description = "Send a notification when going idle, or when HP/Prayer reaches a threshold",
-	tags = {"health", "hitpoints", "notifications", "prayer"}
+	tags = {"health", "hitpoints", "notifications", "prayer"},
+	enabledByDefault = false
 )
 public class IdleNotifierPlugin extends Plugin
 {
@@ -108,6 +109,13 @@ public class IdleNotifierPlugin extends Plugin
 	IdleNotifierConfig provideConfig(ConfigManager configManager)
 	{
 		return configManager.getConfig(IdleNotifierConfig.class);
+	}
+
+	@Override
+	protected void startUp() throws Exception
+	{
+		// can't tell when 6hr will be if enabled while already logged in
+		sixHourWarningTime = null;
 	}
 
 	@Subscribe
@@ -285,6 +293,7 @@ public class IdleNotifierPlugin extends Plugin
 			case PISCARILIUS_CRANE_REPAIR:
 			case HOME_MAKE_TABLET:
 			case SAND_COLLECTION:
+			case LOOKING_INTO:
 				resetTimers();
 				lastAnimation = animation;
 				lastAnimating = Instant.now();
@@ -525,7 +534,7 @@ public class IdleNotifierPlugin extends Plugin
 		{
 			return false;
 		}
-		if (config.getOxygenThreshold() >= client.getVar(Varbits.OXYGEN_LEVEL) * 0.1)
+		if (config.getOxygenThreshold() >= client.getVarbitValue(Varbits.OXYGEN_LEVEL) * 0.1)
 		{
 			if (!notifyOxygen)
 			{
@@ -548,7 +557,7 @@ public class IdleNotifierPlugin extends Plugin
 		}
 		if (client.getRealSkillLevel(Skill.HITPOINTS) > config.getHitpointsThreshold())
 		{
-			if (client.getBoostedSkillLevel(Skill.HITPOINTS) + client.getVar(Varbits.NMZ_ABSORPTION) <= config.getHitpointsThreshold())
+			if (client.getBoostedSkillLevel(Skill.HITPOINTS) + client.getVarbitValue(Varbits.NMZ_ABSORPTION) <= config.getHitpointsThreshold())
 			{
 				if (!notifyHitpoints)
 				{

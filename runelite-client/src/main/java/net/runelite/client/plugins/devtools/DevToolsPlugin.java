@@ -38,6 +38,7 @@ import lombok.Getter;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Experience;
+import net.runelite.api.IndexedSprite;
 import net.runelite.api.MenuAction;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
@@ -47,6 +48,7 @@ import net.runelite.api.VarbitComposition;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.ScriptCallbackEvent;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.kit.KitType;
@@ -144,6 +146,7 @@ public class DevToolsPlugin extends Plugin
 	private DevToolsButton soundEffects;
 	private DevToolsButton scriptInspector;
 	private DevToolsButton inventoryInspector;
+	private DevToolsButton roofs;
 	private DevToolsButton shell;
 	private NavigationButton navButton;
 
@@ -190,6 +193,7 @@ public class DevToolsPlugin extends Plugin
 		soundEffects = new DevToolsButton("Sound Effects");
 		scriptInspector = new DevToolsButton("Script Inspector");
 		inventoryInspector = new DevToolsButton("Inventory Inspector");
+		roofs = new DevToolsButton("Roofs");
 		shell = new DevToolsButton("Shell");
 
 		overlayManager.add(overlay);
@@ -430,6 +434,25 @@ public class DevToolsPlugin extends Plugin
 					.build());
 				break;
 			}
+			case "modicons":
+			{
+				final ChatMessageBuilder builder = new ChatMessageBuilder();
+				final IndexedSprite[] modIcons = client.getModIcons();
+				for (int i = 0; i < modIcons.length; i++)
+				{
+					builder.append(i + "=").img(i);
+
+					if (i != modIcons.length - 1)
+					{
+						builder.append(", ");
+					}
+				}
+				chatMessageManager.queue(QueuedMessage.builder()
+					.type(ChatMessageType.GAMEMESSAGE)
+					.runeLiteFormattedMessage(builder.build())
+					.build());
+				break;
+			}
 		}
 	}
 
@@ -468,7 +491,15 @@ public class DevToolsPlugin extends Plugin
 			}
 
 			entry.setTarget(entry.getTarget() + " " + ColorUtil.prependColorTag("(" + info + ")", JagexColors.MENU_TARGET));
-			client.setMenuEntries(entries);
+		}
+	}
+
+	@Subscribe
+	public void onScriptCallbackEvent(ScriptCallbackEvent ev)
+	{
+		if ("devtoolsEnabled".equals(ev.getEventName()))
+		{
+			client.getIntStack()[client.getIntStackSize() - 1] = 1;
 		}
 	}
 }

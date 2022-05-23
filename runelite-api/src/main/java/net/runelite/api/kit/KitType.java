@@ -50,9 +50,7 @@ public enum KitType
 	HAIR("Hair"),
 	HANDS("Hands"),
 	BOOTS("Boots"),
-	JAW("Jaw"),
-	RING("Ring"),
-	AMMUNITION("Ammo");
+	JAW("Jaw");
 
 	private final String name;
 

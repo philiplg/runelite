@@ -1,56 +1,46 @@
-import java.util.concurrent.Callable;
+import java.applet.Applet;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ag")
-public class class29 implements Callable {
+@ObfuscatedName("ac")
+public class class29 {
+	@ObfuscatedName("o")
+	static Applet field170;
+	@ObfuscatedName("q")
+	static String field168;
 	@ObfuscatedName("r")
 	@ObfuscatedGetter(
-		intValue = 254933769
+		intValue = -1437756653
 	)
-	@Export("clientTickTimeIdx")
-	static int clientTickTimeIdx;
-	@ObfuscatedName("f")
+	static int field172;
+	@ObfuscatedName("ie")
 	@ObfuscatedSignature(
-		descriptor = "Lnu;"
+		descriptor = "[Lqd;"
 	)
-	final Buffer field216;
-	@ObfuscatedName("o")
-	@ObfuscatedSignature(
-		descriptor = "Lat;"
-	)
-	final class31 field215;
-	// $FF: synthetic field
-	@ObfuscatedSignature(
-		descriptor = "Lax;"
-	)
-	final class35 this$0;
+	@Export("mapSceneSprites")
+	static IndexedSprite[] mapSceneSprites;
 
-	@ObfuscatedSignature(
-		descriptor = "(Lax;Lnu;Lat;)V"
-	)
-	class29(class35 var1, Buffer var2, class31 var3) {
-		this.this$0 = var1; // L: 47
-		this.field216 = var2; // L: 48
-		this.field215 = var3; // L: 49
-	} // L: 50
-
-	public Object call() {
-		return this.field215.vmethod389(this.field216); // L: 53
+	static {
+		field170 = null; // L: 10
+		field168 = ""; // L: 11
 	}
 
-	@ObfuscatedName("ju")
+	@ObfuscatedName("a")
 	@ObfuscatedSignature(
-		descriptor = "(Lhu;I)V",
-		garbageValue = "1142852074"
+		descriptor = "(IB)V",
+		garbageValue = "11"
 	)
-	@Export("invalidateWidget")
-	static void invalidateWidget(Widget var0) {
-		if (var0.cycle == Client.field810) { // L: 11035
-			Client.field811[var0.rootIndex] = true; // L: 11036
-		}
+	@Export("clearItemContainer")
+	static void clearItemContainer(int var0) {
+		ItemContainer var1 = (ItemContainer)ItemContainer.itemContainers.get((long)var0); // L: 63
+		if (var1 != null) { // L: 64
+			for (int var2 = 0; var2 < var1.ids.length; ++var2) { // L: 65
+				var1.ids[var2] = -1; // L: 66
+				var1.quantities[var2] = 0; // L: 67
+			}
 
-	} // L: 11038
+		}
+	} // L: 69
 }

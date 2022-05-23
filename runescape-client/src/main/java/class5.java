@@ -1,112 +1,80 @@
-import net.runelite.mapping.Export;
-import net.runelite.mapping.ObfuscatedGetter;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("e")
-public class class5 extends class16 {
-	@ObfuscatedName("re")
-	@ObfuscatedGetter(
-		intValue = 612354285
-	)
-	static int field40;
+@ObfuscatedName("m")
+public class class5 implements class2 {
 	@ObfuscatedName("o")
-	@Export("clearLoginScreen")
-	static boolean clearLoginScreen;
-	@ObfuscatedName("dp")
-	@ObfuscatedSignature(
-		descriptor = "Lig;"
-	)
-	@Export("archive3")
-	static Archive archive3;
-	@ObfuscatedName("ef")
-	@ObfuscatedGetter(
-		intValue = 2112256777
-	)
-	@Export("currentPort")
-	static int currentPort;
-	@ObfuscatedName("f")
-	@ObfuscatedGetter(
-		intValue = 1021832225
-	)
-	int field42;
-	// $FF: synthetic field
-	@ObfuscatedSignature(
-		descriptor = "Lx;"
-	)
-	final class19 this$0;
+	final MessageDigest field9;
 
 	@ObfuscatedSignature(
-		descriptor = "(Lx;)V"
+		descriptor = "(Lr;)V"
 	)
-	class5(class19 var1) {
-		this.this$0 = var1;
-		this.field42 = -1; // L: 81
-	} // L: 83
-
-	@ObfuscatedName("f")
-	@ObfuscatedSignature(
-		descriptor = "(Lnu;I)V",
-		garbageValue = "-1239860939"
-	)
-	void vmethod356(Buffer var1) {
-		this.field42 = var1.readUnsignedShort(); // L: 86
-		var1.readUnsignedByte(); // L: 87
-		if (var1.readUnsignedByte() != 255) { // L: 88
-			--var1.offset; // L: 89
-			var1.readLong(); // L: 90
-		}
-
-	} // L: 92
+	class5(class8 var1) {
+		this.field9 = this.method27(); // L: 14
+	} // L: 15
 
 	@ObfuscatedName("o")
-	@ObfuscatedSignature(
-		descriptor = "(Lp;I)V",
-		garbageValue = "1583378087"
-	)
-	void vmethod352(class3 var1) {
-		var1.method45(this.field42); // L: 95
-	} // L: 96
-
-	@ObfuscatedName("o")
-	@ObfuscatedSignature(
-		descriptor = "(ILlp;Lig;I)V",
-		garbageValue = "1497398389"
-	)
-	static void method85(int var0, ArchiveDisk var1, Archive var2) {
-		ArchiveDiskAction var3 = new ArchiveDiskAction(); // L: 30
-		var3.type = 1; // L: 31
-		var3.key = (long)var0; // L: 32
-		var3.archiveDisk = var1; // L: 33
-		var3.archive = var2; // L: 34
-		synchronized(ArchiveDiskActionHandler.ArchiveDiskActionHandler_requestQueue) { // L: 35
-			ArchiveDiskActionHandler.ArchiveDiskActionHandler_requestQueue.addFirst(var3); // L: 36
-		} // L: 37
-
-		ItemLayer.method3271(); // L: 38
-	} // L: 39
-
-	@ObfuscatedName("d")
-	@ObfuscatedSignature(
-		descriptor = "(IIB)I",
-		garbageValue = "74"
-	)
-	static final int method83(int var0, int var1) {
-		int var2 = class312.method5606(var0 - 1, var1 - 1) + class312.method5606(1 + var0, var1 - 1) + class312.method5606(var0 - 1, var1 + 1) + class312.method5606(var0 + 1, 1 + var1); // L: 977
-		int var3 = class312.method5606(var0 - 1, var1) + class312.method5606(1 + var0, var1) + class312.method5606(var0, var1 - 1) + class312.method5606(var0, var1 + 1); // L: 978
-		int var4 = class312.method5606(var0, var1); // L: 979
-		return var2 / 16 + var3 / 8 + var4 / 4; // L: 980
+	boolean method36(int var1, String var2, long var3) {
+		byte[] var5 = this.method37(var2, var3); // L: 18
+		return method25(var5) >= var1; // L: 19
 	}
 
-	@ObfuscatedName("jf")
-	@ObfuscatedSignature(
-		descriptor = "(IIIIIIIB)V",
-		garbageValue = "52"
-	)
-	@Export("updateRootInterface")
-	static final void updateRootInterface(int var0, int var1, int var2, int var3, int var4, int var5, int var6) {
-		if (class15.loadInterface(var0)) { // L: 10400
-			GameObject.updateInterface(Widget.Widget_interfaceComponents[var0], -1, var1, var2, var3, var4, var5, var6); // L: 10401
+	@ObfuscatedName("k")
+	byte[] method37(String var1, long var2) {
+		StringBuilder var4 = new StringBuilder(); // L: 56
+		var4.append(var1).append(Long.toHexString(var2)); // L: 57
+		this.field9.reset(); // L: 58
+
+		try {
+			this.field9.update(var4.toString().getBytes("UTF-8")); // L: 60
+		} catch (UnsupportedEncodingException var6) { // L: 62
+			var6.printStackTrace(); // L: 63
 		}
-	} // L: 10402
+
+		return this.field9.digest(); // L: 65
+	}
+
+	@ObfuscatedName("a")
+	MessageDigest method27() {
+		try {
+			return MessageDigest.getInstance("SHA-256"); // L: 70
+		} catch (NoSuchAlgorithmException var2) { // L: 72
+			var2.printStackTrace(); // L: 73
+			return null; // L: 74
+		}
+	}
+
+	@ObfuscatedName("q")
+	static int method25(byte[] var0) {
+		int var1 = 0; // L: 23
+		byte[] var2 = var0; // L: 25
+
+		for (int var3 = 0; var3 < var2.length; ++var3) { // L: 26
+			byte var4 = var2[var3]; // L: 27
+			int var5 = method35(var4); // L: 29
+			var1 += var5; // L: 30
+			if (var5 != 8) { // L: 31
+				break;
+			}
+		}
+
+		return var1; // L: 37
+	}
+
+	@ObfuscatedName("l")
+	static int method35(byte var0) {
+		int var1 = 0; // L: 41
+		if (var0 == 0) { // L: 42
+			var1 = 8; // L: 43
+		} else {
+			for (int var2 = var0 & 255; (var2 & 128) == 0; var2 <<= 1) { // L: 46 47 49
+				++var1; // L: 48
+			}
+		}
+
+		return var1; // L: 52
+	}
 }

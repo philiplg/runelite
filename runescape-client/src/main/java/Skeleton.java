@@ -1,121 +1,195 @@
+import java.io.IOException;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("fa")
+@ObfuscatedName("gf")
 @Implements("Skeleton")
 public class Skeleton extends Node {
-	@ObfuscatedName("ro")
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = 49328929
-	)
-	static int field1927;
-	@ObfuscatedName("d")
-	@ObfuscatedSignature(
-		descriptor = "Low;"
-	)
-	@Export("options_buttons_2Sprite")
-	static IndexedSprite options_buttons_2Sprite;
-	@ObfuscatedName("f")
-	@ObfuscatedGetter(
-		intValue = -1569878469
+		intValue = 1034195309
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("o")
+	@ObfuscatedName("p")
 	@ObfuscatedGetter(
-		intValue = 1560016173
+		intValue = -27257925
 	)
 	@Export("count")
 	int count;
-	@ObfuscatedName("u")
+	@ObfuscatedName("s")
 	@Export("transformTypes")
 	int[] transformTypes;
-	@ObfuscatedName("p")
+	@ObfuscatedName("r")
 	@Export("labels")
 	int[][] labels;
+	@ObfuscatedName("v")
+	@ObfuscatedSignature(
+		descriptor = "Lgb;"
+	)
+	class202 field2409;
 
-	Skeleton(int var1, byte[] var2) {
-		this.id = var1; // L: 13
-		Buffer var3 = new Buffer(var2); // L: 14
-		this.count = var3.readUnsignedByte(); // L: 15
-		this.transformTypes = new int[this.count]; // L: 16
-		this.labels = new int[this.count][]; // L: 17
+	public Skeleton(int var1, byte[] var2) {
+		this.id = var1; // L: 19
+		Buffer var3 = new Buffer(var2); // L: 20
+		this.count = var3.readUnsignedByte(); // L: 21
+		this.transformTypes = new int[this.count]; // L: 22
+		this.labels = new int[this.count][]; // L: 23
 
 		int var4;
-		for (var4 = 0; var4 < this.count; ++var4) { // L: 18
+		for (var4 = 0; var4 < this.count; ++var4) { // L: 24
 			this.transformTypes[var4] = var3.readUnsignedByte();
 		}
 
-		for (var4 = 0; var4 < this.count; ++var4) { // L: 19
+		for (var4 = 0; var4 < this.count; ++var4) { // L: 25
 			this.labels[var4] = new int[var3.readUnsignedByte()];
 		}
 
-		for (var4 = 0; var4 < this.count; ++var4) { // L: 20
-			for (int var5 = 0; var5 < this.labels[var4].length; ++var5) { // L: 21
+		for (var4 = 0; var4 < this.count; ++var4) { // L: 26
+			for (int var5 = 0; var5 < this.labels[var4].length; ++var5) { // L: 27
 				this.labels[var4][var5] = var3.readUnsignedByte();
 			}
 		}
 
-	} // L: 23
-
-	@ObfuscatedName("f")
-	@ObfuscatedSignature(
-		descriptor = "(III)I",
-		garbageValue = "1482747310"
-	)
-	public static int method3431(int var0, int var1) {
-		int var2;
-		for (var2 = 1; var1 > 1; var1 >>= 1) { // L: 24 25 28
-			if ((var1 & 1) != 0) {
-				var2 = var0 * var2; // L: 26
+		if (var3.offset < var3.array.length) {
+			var4 = var3.readUnsignedShort();
+			if (var4 > 0) {
+				this.field2409 = new class202(var3, var4);
 			}
-
-			var0 *= var0; // L: 27
 		}
 
-		if (var1 == 1) { // L: 30
-			return var0 * var2;
-		} else {
-			return var2; // L: 31
-		}
 	}
 
-	@ObfuscatedName("iu")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
 		descriptor = "(I)I",
-		garbageValue = "-259166904"
+		garbageValue = "-2063510736"
 	)
-	static final int method3433() {
-		return Client.menuOptionsCount - 1; // L: 9018
+	public int method4018() {
+		return this.count; // L: 38
 	}
 
-	@ObfuscatedName("iz")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(IIIIIIIII)V",
-		garbageValue = "353587604"
+		descriptor = "(I)Lgb;",
+		garbageValue = "2098752701"
 	)
-	@Export("drawWidgets")
-	static final void drawWidgets(int var0, int var1, int var2, int var3, int var4, int var5, int var6, int var7) {
-		if (class15.loadInterface(var0)) { // L: 9407
-			WallDecoration.field2179 = null; // L: 9414
-			class2.drawInterface(Widget.Widget_interfaceComponents[var0], -1, var1, var2, var3, var4, var5, var6, var7); // L: 9415
-			if (WallDecoration.field2179 != null) { // L: 9416
-				class2.drawInterface(WallDecoration.field2179, -1412584499, var1, var2, var3, var4, class11.field106, class235.field2843, var7); // L: 9417
-				WallDecoration.field2179 = null; // L: 9418
+	public class202 method4023() {
+		return this.field2409; // L: 42
+	}
+
+	@ObfuscatedName("q")
+	@ObfuscatedSignature(
+		descriptor = "(ILnc;Lle;I)V",
+		garbageValue = "-2024769656"
+	)
+	static void method4022(int var0, ArchiveDisk var1, Archive var2) {
+		byte[] var3 = null;
+		synchronized(ArchiveDiskActionHandler.ArchiveDiskActionHandler_requestQueue) {
+			for (ArchiveDiskAction var5 = (ArchiveDiskAction)ArchiveDiskActionHandler.ArchiveDiskActionHandler_requestQueue.last(); var5 != null; var5 = (ArchiveDiskAction)ArchiveDiskActionHandler.ArchiveDiskActionHandler_requestQueue.previous()) {
+				if (var5.key == (long)var0 && var1 == var5.archiveDisk && var5.type == 0) {
+					var3 = var5.data; // L: 34
+					break;
+				}
+			}
+		}
+
+		if (var3 != null) { // L: 39
+			var2.load(var1, var0, var3, true); // L: 40
+		} else {
+			byte[] var4 = var1.read(var0); // L: 43
+			var2.load(var1, var0, var4, true); // L: 44
+		}
+	} // L: 41 45
+
+	@ObfuscatedName("q")
+	@ObfuscatedSignature(
+		descriptor = "(Lnf;ZI)V",
+		garbageValue = "-824720850"
+	)
+	public static void method4024(AbstractSocket var0, boolean var1) {
+		if (NetCache.NetCache_socket != null) { // L: 60
+			try {
+				NetCache.NetCache_socket.close(); // L: 62
+			} catch (Exception var6) { // L: 64
 			}
 
-		} else {
-			if (var7 != -1) { // L: 9408
-				Client.field811[var7] = true;
-			} else {
-				for (int var8 = 0; var8 < 100; ++var8) { // L: 9410
-					Client.field811[var8] = true;
+			NetCache.NetCache_socket = null; // L: 65
+		}
+
+		NetCache.NetCache_socket = var0; // L: 67
+		MouseRecorder.method2088(var1); // L: 68
+		NetCache.NetCache_responseHeaderBuffer.offset = 0; // L: 69
+		WorldMapIcon_0.NetCache_currentResponse = null; // L: 70
+		class357.NetCache_responseArchiveBuffer = null; // L: 71
+		NetCache.field4052 = 0; // L: 72
+
+		while (true) {
+			NetFileRequest var2 = (NetFileRequest)NetCache.NetCache_pendingPriorityResponses.first(); // L: 74
+			if (var2 == null) { // L: 75
+				while (true) {
+					var2 = (NetFileRequest)NetCache.NetCache_pendingResponses.first(); // L: 81
+					if (var2 == null) { // L: 82
+						if (NetCache.field4043 != 0) { // L: 88
+							try {
+								Buffer var7 = new Buffer(4); // L: 90
+								var7.writeByte(4); // L: 91
+								var7.writeByte(NetCache.field4043); // L: 92
+								var7.writeShort(0); // L: 93
+								NetCache.NetCache_socket.write(var7.array, 0, 4); // L: 94
+							} catch (IOException var5) {
+								try {
+									NetCache.NetCache_socket.close(); // L: 98
+								} catch (Exception var4) { // L: 100
+								}
+
+								++NetCache.NetCache_ioExceptions; // L: 101
+								NetCache.NetCache_socket = null; // L: 102
+							}
+						}
+
+						NetCache.NetCache_loadTime = 0; // L: 105
+						NetCache.field4041 = class113.method2624(); // L: 106
+						return; // L: 107
+					}
+
+					NetCache.NetCache_pendingWritesQueue.addLast(var2); // L: 83
+					NetCache.NetCache_pendingWrites.put(var2, var2.key); // L: 84
+					++NetCache.NetCache_pendingWritesCount; // L: 85
+					--NetCache.NetCache_pendingResponsesCount; // L: 86
 				}
 			}
 
+			NetCache.NetCache_pendingPriorityWrites.put(var2, var2.key); // L: 76
+			++NetCache.NetCache_pendingPriorityWritesCount; // L: 77
+			--NetCache.NetCache_pendingPriorityResponsesCount; // L: 78
 		}
-	} // L: 9412 9420
+	}
+
+	@ObfuscatedName("l")
+	@ObfuscatedSignature(
+		descriptor = "(III)I",
+		garbageValue = "1940091052"
+	)
+	static int method4019(int var0, int var1) {
+		ItemContainer var2 = (ItemContainer)ItemContainer.itemContainers.get((long)var0); // L: 28
+		if (var2 == null) { // L: 29
+			return 0;
+		} else if (var1 == -1) { // L: 30
+			return 0;
+		} else {
+			int var3 = 0; // L: 31
+
+			for (int var4 = 0; var4 < var2.quantities.length; ++var4) { // L: 32
+				if (var2.ids[var4] == var1) {
+					var3 += var2.quantities[var4]; // L: 33
+				}
+			}
+
+			return var3; // L: 35
+		}
+	}
 }

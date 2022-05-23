@@ -1,73 +1,75 @@
+import java.text.ParseException;
+import java.util.Date;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.Implements;
 import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("cf")
+@ObfuscatedName("bf")
 @Implements("GraphicsObject")
-public final class GraphicsObject extends Renderable {
+public class GraphicsObject extends Renderable {
 	@ObfuscatedName("z")
 	@ObfuscatedGetter(
-		intValue = -1860444775
+		intValue = 772916355
 	)
-	@Export("loginBoxCenter")
-	static int loginBoxCenter;
-	@ObfuscatedName("f")
+	@Export("canvasWidth")
+	public static int canvasWidth;
+	@ObfuscatedName("o")
 	@ObfuscatedGetter(
-		intValue = -1442514319
+		intValue = -1248002899
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -255937363
+		intValue = -1478722299
 	)
 	@Export("cycleStart")
 	int cycleStart;
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedGetter(
-		intValue = -1558185979
+		intValue = 118002909
 	)
 	@Export("plane")
 	int plane;
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedGetter(
-		intValue = -799404683
+		intValue = 800105373
 	)
 	@Export("x")
 	int x;
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@ObfuscatedGetter(
-		intValue = -1197647983
+		intValue = -738623243
 	)
 	@Export("y")
 	int y;
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@ObfuscatedGetter(
-		intValue = 921468661
+		intValue = 1237979949
 	)
-	@Export("height")
-	int height;
-	@ObfuscatedName("k")
+	@Export("z")
+	int z;
+	@ObfuscatedName("p")
 	@ObfuscatedSignature(
-		descriptor = "Lkw;"
+		descriptor = "Lgq;"
 	)
 	@Export("sequenceDefinition")
 	SequenceDefinition sequenceDefinition;
-	@ObfuscatedName("g")
+	@ObfuscatedName("s")
 	@ObfuscatedGetter(
-		intValue = 1763592485
+		intValue = 657870691
 	)
 	@Export("frame")
 	int frame;
-	@ObfuscatedName("h")
+	@ObfuscatedName("r")
 	@ObfuscatedGetter(
-		intValue = 1659206025
+		intValue = 1465530257
 	)
 	@Export("frameCycle")
 	int frameCycle;
-	@ObfuscatedName("n")
+	@ObfuscatedName("v")
 	@Export("isFinished")
 	boolean isFinished;
 
@@ -79,101 +81,123 @@ public final class GraphicsObject extends Renderable {
 		this.plane = var2; // L: 22
 		this.x = var3; // L: 23
 		this.y = var4; // L: 24
-		this.height = var5; // L: 25
+		this.z = var5; // L: 25
 		this.cycleStart = var7 + var6; // L: 26
-		int var8 = Varps.SpotAnimationDefinition_get(this.id).sequence; // L: 27
+		int var8 = class136.SpotAnimationDefinition_get(this.id).sequence; // L: 27
 		if (var8 != -1) { // L: 28
 			this.isFinished = false; // L: 29
-			this.sequenceDefinition = class225.SequenceDefinition_get(var8); // L: 30
+			this.sequenceDefinition = class114.SequenceDefinition_get(var8); // L: 30
 		} else {
 			this.isFinished = true; // L: 32
 		}
 
 	} // L: 33
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(II)V",
-		garbageValue = "1392688450"
+		descriptor = "(IB)V",
+		garbageValue = "115"
 	)
 	@Export("advance")
 	final void advance(int var1) {
 		if (!this.isFinished) { // L: 36
 			this.frameCycle += var1; // L: 37
-
-			while (this.frameCycle > this.sequenceDefinition.frameLengths[this.frame]) { // L: 38
-				this.frameCycle -= this.sequenceDefinition.frameLengths[this.frame]; // L: 39
-				++this.frame; // L: 40
-				if (this.frame >= this.sequenceDefinition.frameIds.length) { // L: 41
-					this.isFinished = true; // L: 42
-					break;
+			if (!this.sequenceDefinition.isCachedModelIdSet()) { // L: 38
+				while (this.frameCycle > this.sequenceDefinition.frameLengths[this.frame]) { // L: 39
+					this.frameCycle -= this.sequenceDefinition.frameLengths[this.frame]; // L: 40
+					++this.frame; // L: 41
+					if (this.frame >= this.sequenceDefinition.frameIds.length) { // L: 42
+						this.isFinished = true; // L: 43
+						break;
+					}
+				}
+			} else {
+				this.frame += var1; // L: 49
+				if (this.frame >= this.sequenceDefinition.method3729()) { // L: 50
+					this.isFinished = true;
 				}
 			}
 
 		}
-	} // L: 46
+	} // L: 52
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(I)Lgv;",
-		garbageValue = "1835906978"
+		descriptor = "(I)Lhv;",
+		garbageValue = "-238822980"
 	)
 	@Export("getModel")
 	protected final Model getModel() {
-		SpotAnimationDefinition var1 = Varps.SpotAnimationDefinition_get(this.id); // L: 49
+		SpotAnimationDefinition var1 = class136.SpotAnimationDefinition_get(this.id); // L: 55
 		Model var2;
-		if (!this.isFinished) { // L: 51
+		if (!this.isFinished) { // L: 57
 			var2 = var1.getModel(this.frame);
 		} else {
-			var2 = var1.getModel(-1); // L: 52
+			var2 = var1.getModel(-1); // L: 58
 		}
 
-		return var2 == null ? null : var2; // L: 53
+		return var2 == null ? null : var2; // L: 59
 	}
 
 	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(II)Lkc;",
-		garbageValue = "-2021558872"
+		descriptor = "(Ljx;B)V",
+		garbageValue = "-3"
 	)
-	@Export("getNpcDefinition")
-	public static NPCComposition getNpcDefinition(int var0) {
-		NPCComposition var1 = (NPCComposition)NPCComposition.NpcDefinition_cached.get((long)var0); // L: 62
-		if (var1 != null) { // L: 63
-			return var1;
-		} else {
-			byte[] var2 = NPCComposition.NpcDefinition_archive.takeFile(9, var0); // L: 64
-			var1 = new NPCComposition(); // L: 65
-			var1.id = var0; // L: 66
-			if (var2 != null) { // L: 67
-				var1.decode(new Buffer(var2));
-			}
+	public static void method1870(Huffman var0) {
+		class282.huffman = var0; // L: 14
+	} // L: 15
 
-			var1.postDecode(); // L: 68
-			NPCComposition.NpcDefinition_cached.put(var1, (long)var0); // L: 69
-			return var1; // L: 70
+	@ObfuscatedName("a")
+	@ObfuscatedSignature(
+		descriptor = "(I)Z",
+		garbageValue = "-2116498850"
+	)
+	static boolean method1867() {
+		Date var0;
+		try {
+			var0 = class115.method2679(); // L: 955
+		} catch (ParseException var7) { // L: 957
+			class126.method2799(7); // L: 959
+			class345.setLoginResponseString("Date not valid.", "Please ensure date follows the format", "DD/MM/YYYY and is after 01/01/1900"); // L: 960
+			return false; // L: 962
+		}
+
+		if (var0 == null) { // L: 964
+			return false; // L: 965
+		} else {
+			boolean var5 = class268.method5028(var0); // L: 967
+			java.util.Calendar var4 = java.util.Calendar.getInstance(); // L: 972
+			var4.set(2, 0); // L: 973
+			var4.set(5, 1); // L: 974
+			var4.set(1, 1900); // L: 975
+			Date var3 = var4.getTime(); // L: 976
+			boolean var2 = var0.after(var3); // L: 979
+			if (!var2) { // L: 982
+				class126.method2799(7); // L: 984
+				class345.setLoginResponseString("Date not valid.", "Please ensure date follows the format", "DD/MM/YYYY and is after 01/01/1900"); // L: 985
+				return false; // L: 987
+			} else {
+				if (!var5) { // L: 989
+					class7.field26 = 8388607; // L: 990
+				} else {
+					class7.field26 = (int)(var0.getTime() / 86400000L - 11745L); // L: 993
+				}
+
+				return true; // L: 995
+			}
 		}
 	}
 
-	@ObfuscatedName("kq")
+	@ObfuscatedName("m")
 	@ObfuscatedSignature(
-		descriptor = "(III)V",
-		garbageValue = "-733559314"
+		descriptor = "(II)Z",
+		garbageValue = "19136992"
 	)
-	static final void method1913(int var0, int var1) {
-		class3 var2 = var0 >= 0 ? Client.field820[var0] : IsaacCipher.field4266; // L: 11538
-		if (var2 != null && var1 >= 0 && var1 < var2.method46()) { // L: 11539
-			class9 var3 = (class9)var2.field27.get(var1); // L: 11540
-			if (var3.field66 == -1) {
-				String var4 = var3.field65; // L: 11542
-				PacketWriter var5 = Client.packetWriter; // L: 11543
-				PacketBufferNode var6 = ObjectComposition.getPacketBufferNode(ClientPacket.field2316, var5.isaacCipher); // L: 11544
-				var6.packetBuffer.writeByte(3 + Friend.stringCp1252NullTerminatedByteSize(var4)); // L: 11545
-				var6.packetBuffer.writeByte(var0); // L: 11546
-				var6.packetBuffer.writeShort(var1); // L: 11547
-				var6.packetBuffer.writeStringCp1252NullTerminated(var4); // L: 11548
-				var5.addNode(var6); // L: 11549
-			}
-		}
-	} // L: 11541 11550
+	public static boolean method1868(int var0) {
+		return var0 == WorldMapDecorationType.field3578.id; // L: 51
+	}
+
+	public GraphicsObject() {
+	}
 }

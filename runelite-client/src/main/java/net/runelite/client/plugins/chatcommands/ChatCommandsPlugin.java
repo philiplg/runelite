@@ -27,15 +27,25 @@ package net.runelite.client.plugins.chatcommands;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -43,45 +53,49 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.Experience;
 import net.runelite.api.IconID;
+import net.runelite.api.IndexedSprite;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.MessageNode;
 import net.runelite.api.Player;
+import net.runelite.api.ScriptID;
 import net.runelite.api.VarPlayer;
 import net.runelite.api.Varbits;
 import net.runelite.api.WorldType;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.ScriptPostFired;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetLoaded;
 import net.runelite.api.vars.AccountType;
 import net.runelite.api.widgets.Widget;
 import static net.runelite.api.widgets.WidgetID.ADVENTURE_LOG_ID;
-import static net.runelite.api.widgets.WidgetID.GENERIC_SCROLL_GROUP_ID;
+import static net.runelite.api.widgets.WidgetID.DIARY_QUEST_GROUP_ID;
 import static net.runelite.api.widgets.WidgetID.KILL_LOGS_GROUP_ID;
 import net.runelite.api.widgets.WidgetInfo;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.chat.ChatClient;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatCommandManager;
 import net.runelite.client.chat.ChatMessageBuilder;
-import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ChatInput;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.hiscore.HiscoreClient;
+import net.runelite.client.hiscore.HiscoreEndpoint;
+import net.runelite.client.hiscore.HiscoreResult;
+import net.runelite.client.hiscore.HiscoreSkill;
+import net.runelite.client.hiscore.Skill;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.util.AsyncBufferedImage;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.QuantityFormatter;
 import net.runelite.client.util.Text;
-import net.runelite.http.api.chat.ChatClient;
 import net.runelite.http.api.chat.Duels;
-import net.runelite.http.api.hiscore.HiscoreClient;
-import net.runelite.http.api.hiscore.HiscoreEndpoint;
-import net.runelite.http.api.hiscore.HiscoreResult;
-import net.runelite.http.api.hiscore.HiscoreSkill;
-import net.runelite.http.api.hiscore.SingleHiscoreSkillResult;
-import net.runelite.http.api.hiscore.Skill;
 import net.runelite.http.api.item.ItemPrice;
 import okhttp3.OkHttpClient;
 import org.apache.commons.text.WordUtils;
@@ -94,24 +108,22 @@ import org.apache.commons.text.WordUtils;
 @Slf4j
 public class ChatCommandsPlugin extends Plugin
 {
-	private static final Pattern KILLCOUNT_PATTERN = Pattern.compile("Your (?:completion count for |subdued |completed )?(.+?) (?:(?:kill|harvest|lap|completion) )?(?:count )?is: <col=ff0000>(\\d+)</col>");
-	private static final String COX_TEAM_SIZES = "(?:\\d+(?:\\+|-\\d+)? players|Solo)";
-	private static final Pattern RAIDS_PB_PATTERN = Pattern.compile("<col=ef20ff>Congratulations - your raid is complete!</col><br>Team size: <col=ff0000>" + COX_TEAM_SIZES + "</col> Duration:</col> <col=ff0000>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col> \\(new personal best\\)</col>");
-	private static final Pattern RAIDS_DURATION_PATTERN = Pattern.compile("<col=ef20ff>Congratulations - your raid is complete!</col><br>Team size: <col=ff0000>" + COX_TEAM_SIZES + "</col> Duration:</col> <col=ff0000>[0-9:.]+</col> Personal best: </col><col=ff0000>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col>");
-	private static final Pattern TOB_WAVE_PB_PATTERN = Pattern.compile("^.*Theatre of Blood wave completion time: <col=ff0000>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col> \\(Personal best!\\)");
-	private static final Pattern TOB_WAVE_DURATION_PATTERN = Pattern.compile("^.*Theatre of Blood wave completion time: <col=ff0000>[0-9:.]+</col><br></col>Personal best: (?<pb>[0-9:]+(?:\\.[0-9]+)?)");
-	private static final Pattern KILL_DURATION_PATTERN = Pattern.compile("(?i)^(?:(?:Fight |Lap |Challenge |Corrupted challenge )?duration:|Subdued in) <col=[0-9a-f]{6}>[0-9:.]+</col>\\. Personal best: (?:<col=ff0000>)?(?<pb>[0-9:]+(?:\\.[0-9]+)?)");
-	private static final Pattern NEW_PB_PATTERN = Pattern.compile("(?i)^(?:(?:Fight |Lap |Challenge |Corrupted challenge )?duration:|Subdued in) <col=[0-9a-f]{6}>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col> \\(new personal best\\)");
-	private static final Pattern DUEL_ARENA_WINS_PATTERN = Pattern.compile("You (were defeated|won)! You have(?: now)? won (\\d+) duels?");
-	private static final Pattern DUEL_ARENA_LOSSES_PATTERN = Pattern.compile("You have(?: now)? lost (\\d+) duels?");
+	private static final Pattern KILLCOUNT_PATTERN = Pattern.compile("Your (?<pre>completion count for |subdued |completed )?(?<boss>.+?) (?<post>(?:(?:kill|harvest|lap|completion) )?(?:count )?)is: <col=ff0000>(?<kc>\\d+)</col>");
+	private static final String TEAM_SIZES = "(?<teamsize>\\d+(?:\\+|-\\d+)? players?|Solo)";
+	private static final Pattern RAIDS_PB_PATTERN = Pattern.compile("<col=ef20ff>Congratulations - your raid is complete!</col><br>Team size: <col=ff0000>" + TEAM_SIZES + "</col> Duration:</col> <col=ff0000>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col> \\(new personal best\\)</col>");
+	private static final Pattern RAIDS_DURATION_PATTERN = Pattern.compile("<col=ef20ff>Congratulations - your raid is complete!</col><br>Team size: <col=ff0000>" + TEAM_SIZES + "</col> Duration:</col> <col=ff0000>[0-9:.]+</col> Personal best: </col><col=ff0000>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col>");
+	private static final Pattern KILL_DURATION_PATTERN = Pattern.compile("(?i)(?:(?:Fight |Lap |Challenge |Corrupted challenge )?duration:|Subdued in|(?<!total )completion time:) <col=[0-9a-f]{6}>[0-9:.]+</col>\\. Personal best: (?:<col=ff0000>)?(?<pb>[0-9:]+(?:\\.[0-9]+)?)");
+	private static final Pattern NEW_PB_PATTERN = Pattern.compile("(?i)(?:(?:Fight |Lap |Challenge |Corrupted challenge )?duration:|Subdued in|(?<!total )completion time:) <col=[0-9a-f]{6}>(?<pb>[0-9:]+(?:\\.[0-9]+)?)</col> \\(new personal best\\)");
+	private static final Pattern DUEL_ARENA_WINS_PATTERN = Pattern.compile("You (were defeated|won)! You have(?: now)? won ([\\d,]+|one) duels?");
+	private static final Pattern DUEL_ARENA_LOSSES_PATTERN = Pattern.compile("You have(?: now)? lost ([\\d,]+|one) duels?");
 	private static final Pattern ADVENTURE_LOG_TITLE_PATTERN = Pattern.compile("The Exploits of (.+)");
-	private static final Pattern ADVENTURE_LOG_COX_PB_PATTERN = Pattern.compile("Fastest (?:kill|run)(?: - \\(Team size: " + COX_TEAM_SIZES  + "\\))?: ([0-9:]+(?:\\.[0-9]+)?)");
-	private static final Pattern ADVENTURE_LOG_BOSS_PB_PATTERN = Pattern.compile("[a-zA-Z]+(?: [a-zA-Z]+)*");
-	private static final Pattern ADVENTURE_LOG_PB_PATTERN = Pattern.compile("(" + ADVENTURE_LOG_BOSS_PB_PATTERN + "(?: - " + ADVENTURE_LOG_BOSS_PB_PATTERN + ")*) (?:" + ADVENTURE_LOG_COX_PB_PATTERN + "( )*)+");
+	private static final Pattern ADVENTURE_LOG_PB_PATTERN = Pattern.compile("Fastest (?:kill|run|Room time)(?: - \\(Team size: \\(?" + TEAM_SIZES + "\\)\\)?)?: (?<time>[0-9:]+(?:\\.[0-9]+)?)");
 	private static final Pattern HS_PB_PATTERN = Pattern.compile("Floor (?<floor>\\d) time: <col=ff0000>(?<floortime>[0-9:]+(?:\\.[0-9]+)?)</col>(?: \\(new personal best\\)|. Personal best: (?<floorpb>[0-9:]+(?:\\.[0-9]+)?))" +
 		"(?:<br>Overall time: <col=ff0000>(?<otime>[0-9:]+(?:\\.[0-9]+)?)</col>(?: \\(new personal best\\)|. Personal best: (?<opb>[0-9:]+(?:\\.[0-9]+)?)))?");
 	private static final Pattern HS_KC_FLOOR_PATTERN = Pattern.compile("You have completed Floor (\\d) of the Hallowed Sepulchre! Total completions: <col=ff0000>([0-9,]+)</col>\\.");
 	private static final Pattern HS_KC_GHC_PATTERN = Pattern.compile("You have opened the Grand Hallowed Coffin <col=ff0000>([0-9,]+)</col> times?!");
+	private static final Pattern COLLECTION_LOG_ITEM_PATTERN = Pattern.compile("New item added to your collection log: (.*)");
+	private static final Pattern GUARDIANS_OF_THE_RIFT_PATTERN = Pattern.compile("Amount of Rifts you have closed: <col=ff0000>([0-9,]+)</col>.", Pattern.CASE_INSENSITIVE);
 
 	private static final String TOTAL_LEVEL_COMMAND_STRING = "!total";
 	private static final String PRICE_COMMAND_STRING = "!price";
@@ -128,9 +140,11 @@ public class ChatCommandsPlugin extends Plugin
 	private static final String DUEL_ARENA_COMMAND = "!duels";
 	private static final String LEAGUE_POINTS_COMMAND = "!lp";
 	private static final String SOUL_WARS_ZEAL_COMMAND = "!sw";
+	private static final String PET_LIST_COMMAND = "!pets";
 
 	@VisibleForTesting
 	static final int ADV_LOG_EXPLOITS_TEXT_INDEX = 1;
+	static final int COL_LOG_ENTRY_HEADER_TITLE_INDEX = 0;
 
 	private static final Map<String, String> KILLCOUNT_RENAMES = ImmutableMap.of(
 		"Barrows chest", "Barrows Chests"
@@ -144,9 +158,14 @@ public class ChatCommandsPlugin extends Plugin
 	private String lastBossKill;
 	private int lastBossTime = -1;
 	private double lastPb = -1;
+	private String lastTeamSize;
+	private int modIconIdx = -1;
 
 	@Inject
 	private Client client;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Inject
 	private ChatCommandsConfig config;
@@ -156,9 +175,6 @@ public class ChatCommandsPlugin extends Plugin
 
 	@Inject
 	private ItemManager itemManager;
-
-	@Inject
-	private ChatMessageManager chatMessageManager;
 
 	@Inject
 	private ChatCommandManager chatCommandManager;
@@ -181,6 +197,9 @@ public class ChatCommandsPlugin extends Plugin
 	@Inject
 	private RuneLiteConfig runeLiteConfig;
 
+	@Inject
+	private Gson gson;
+
 	@Override
 	public void startUp()
 	{
@@ -201,6 +220,17 @@ public class ChatCommandsPlugin extends Plugin
 		chatCommandManager.registerCommandAsync(GC_COMMAND_STRING, this::gambleCountLookup, this::gambleCountSubmit);
 		chatCommandManager.registerCommandAsync(DUEL_ARENA_COMMAND, this::duelArenaLookup, this::duelArenaSubmit);
 		chatCommandManager.registerCommandAsync(SOUL_WARS_ZEAL_COMMAND, this::soulWarsZealLookup);
+		chatCommandManager.registerCommandAsync(PET_LIST_COMMAND, this::petListLookup, this::petListSubmit);
+
+		clientThread.invoke(() ->
+		{
+			if (client.getModIcons() == null)
+			{
+				return false;
+			}
+			loadPetIcons();
+			return true;
+		});
 	}
 
 	@Override
@@ -226,6 +256,7 @@ public class ChatCommandsPlugin extends Plugin
 		chatCommandManager.unregisterCommand(GC_COMMAND_STRING);
 		chatCommandManager.unregisterCommand(DUEL_ARENA_COMMAND);
 		chatCommandManager.unregisterCommand(SOUL_WARS_ZEAL_COMMAND);
+		chatCommandManager.unregisterCommand(PET_LIST_COMMAND);
 	}
 
 	@Provides
@@ -245,6 +276,11 @@ public class ChatCommandsPlugin extends Plugin
 		configManager.setRSProfileConfiguration("killcount", boss.toLowerCase(), killcount);
 	}
 
+	private void unsetKc(String boss)
+	{
+		configManager.unsetRSProfileConfiguration("killcount", boss.toLowerCase());
+	}
+
 	private int getKc(String boss)
 	{
 		Integer killCount = configManager.getRSProfileConfiguration("killcount", boss.toLowerCase(), int.class);
@@ -256,10 +292,86 @@ public class ChatCommandsPlugin extends Plugin
 		configManager.setRSProfileConfiguration("personalbest", boss.toLowerCase(), seconds);
 	}
 
+	private void unsetPb(String boss)
+	{
+		configManager.unsetRSProfileConfiguration("personalbest", boss.toLowerCase());
+	}
+
 	private double getPb(String boss)
 	{
 		Double personalBest = configManager.getRSProfileConfiguration("personalbest", boss.toLowerCase(), double.class);
 		return personalBest == null ? 0 : personalBest;
+	}
+
+	private void loadPetIcons()
+	{
+		if (modIconIdx != -1)
+		{
+			return;
+		}
+
+		final Pet[] pets = Pet.values();
+		final IndexedSprite[] modIcons = client.getModIcons();
+		assert modIcons != null;
+		final IndexedSprite[] newModIcons = Arrays.copyOf(modIcons, modIcons.length + pets.length);
+		modIconIdx = modIcons.length;
+
+		for (int i = 0; i < pets.length; i++)
+		{
+			final Pet pet = pets[i];
+
+			final AsyncBufferedImage abi = itemManager.getImage(pet.getIconID());
+			final int idx = modIconIdx + i;
+			Runnable r = () ->
+			{
+				final BufferedImage image = ImageUtil.resizeImage(abi, 18, 16);
+				final IndexedSprite sprite = ImageUtil.getImageIndexedSprite(image, client);
+				newModIcons[idx] = sprite;
+			};
+			abi.onLoaded(r);
+			r.run();
+		}
+
+		client.setModIcons(newModIcons);
+	}
+
+	/**
+	 * Sets the list of owned pets for the local player
+	 *
+	 * @param petList The total list of owned pets for the local player
+	 */
+	private void setPetList(List<Pet> petList)
+	{
+		if (petList == null)
+		{
+			return;
+		}
+
+		configManager.setRSProfileConfiguration("chatcommands", "pets",
+			gson.toJson(petList));
+	}
+
+	/**
+	 * Looks up the list of owned pets for the local player
+	 */
+	private List<Pet> getPetList()
+	{
+		String petListJson = configManager.getRSProfileConfiguration("chatcommands", "pets",
+			String.class);
+
+		List<Pet> petList;
+		try
+		{
+			// CHECKSTYLE:OFF
+			petList = gson.fromJson(petListJson, new TypeToken<List<Pet>>(){}.getType());
+			// CHECKSTYLE:ON
+		}
+		catch (JsonSyntaxException ex)
+		{
+			return Collections.emptyList();
+		}
+
+		return petList != null ? petList : Collections.emptyList();
 	}
 
 	@Subscribe
@@ -277,22 +389,66 @@ public class ChatCommandsPlugin extends Plugin
 		Matcher matcher = KILLCOUNT_PATTERN.matcher(message);
 		if (matcher.find())
 		{
-			String boss = matcher.group(1);
-			int kc = Integer.parseInt(matcher.group(2));
+			final String boss = matcher.group("boss");
+			final int kc = Integer.parseInt(matcher.group("kc"));
+			final String pre = matcher.group("pre");
+			final String post = matcher.group("post");
 
-			boss = KILLCOUNT_RENAMES.getOrDefault(boss, boss);
+			if (Strings.isNullOrEmpty(pre) && Strings.isNullOrEmpty(post))
+			{
+				unsetKc(boss);
+				return;
+			}
 
-			setKc(boss, kc);
+			String renamedBoss = KILLCOUNT_RENAMES
+				.getOrDefault(boss, boss)
+				// The config service doesn't support keys with colons in them
+				.replace(":", "");
+			if (boss != renamedBoss)
+			{
+				// Unset old TOB kc
+				unsetKc(boss);
+				unsetPb(boss);
+				unsetKc(boss.replace(":", "."));
+				unsetPb(boss.replace(":", "."));
+				// Unset old story mode
+				unsetKc("Theatre of Blood Story Mode");
+				unsetPb("Theatre of Blood Story Mode");
+			}
+
+			setKc(renamedBoss, kc);
 			// We either already have the pb, or need to remember the boss for the upcoming pb
 			if (lastPb > -1)
 			{
-				log.debug("Got out-of-order personal best for {}: {}", boss, lastPb);
-				setPb(boss, lastPb);
+				log.debug("Got out-of-order personal best for {}: {}", renamedBoss, lastPb);
+
+				if (renamedBoss.contains("Theatre of Blood"))
+				{
+					// TOB team size isn't sent in the kill message, but can be computed from varbits
+					int tobTeamSize = tobTeamSize();
+					lastTeamSize = tobTeamSize == 1 ? "Solo" : (tobTeamSize + " players");
+				}
+
+				final double pb = getPb(renamedBoss);
+				// If a raid with a team size, only update the pb if it is lower than the existing pb
+				// so that the pb is the overall lowest of any team size
+				if (lastTeamSize == null || pb == 0 || lastPb < pb)
+				{
+					log.debug("Setting overall pb (old: {})", pb);
+					setPb(renamedBoss, lastPb);
+				}
+				if (lastTeamSize != null)
+				{
+					log.debug("Setting team size pb: {}", lastTeamSize);
+					setPb(renamedBoss + " " + lastTeamSize, lastPb);
+				}
+
 				lastPb = -1;
+				lastTeamSize = null;
 			}
 			else
 			{
-				lastBossKill = boss;
+				lastBossKill = renamedBoss;
 				lastBossTime = client.getTickCount();
 			}
 			return;
@@ -302,7 +458,8 @@ public class ChatCommandsPlugin extends Plugin
 		if (matcher.find())
 		{
 			final int oldWins = getKc("Duel Arena Wins");
-			final int wins = Integer.parseInt(matcher.group(2));
+			final int wins = matcher.group(2).equals("one") ? 1 :
+				Integer.parseInt(matcher.group(2).replace(",", ""));
 			final String result = matcher.group(1);
 			int winningStreak = getKc("Duel Arena Win Streak");
 			int losingStreak = getKc("Duel Arena Lose Streak");
@@ -330,7 +487,8 @@ public class ChatCommandsPlugin extends Plugin
 		matcher = DUEL_ARENA_LOSSES_PATTERN.matcher(message);
 		if (matcher.find())
 		{
-			int losses = Integer.parseInt(matcher.group(1));
+			int losses = matcher.group(1).equals("one") ? 1 :
+				Integer.parseInt(matcher.group(1).replace(",", ""));
 
 			setKc("Duel Arena Losses", losses);
 		}
@@ -354,18 +512,6 @@ public class ChatCommandsPlugin extends Plugin
 		}
 
 		matcher = RAIDS_DURATION_PATTERN.matcher(message);
-		if (matcher.find())
-		{
-			matchPb(matcher);
-		}
-
-		matcher = TOB_WAVE_PB_PATTERN.matcher(message);
-		if (matcher.find())
-		{
-			matchPb(matcher);
-		}
-
-		matcher = TOB_WAVE_DURATION_PATTERN.matcher(message);
 		if (matcher.find())
 		{
 			matchPb(matcher);
@@ -410,6 +556,31 @@ public class ChatCommandsPlugin extends Plugin
 			lastBossKill = null;
 			lastBossTime = -1;
 		}
+
+		matcher = COLLECTION_LOG_ITEM_PATTERN.matcher(message);
+		if (matcher.find())
+		{
+			String item = matcher.group(1);
+			Pet pet = Pet.findPet(item);
+
+			if (pet != null)
+			{
+				List<Pet> petList = new ArrayList<>(getPetList());
+				if (!petList.contains(pet))
+				{
+					log.debug("New pet added: {}", pet);
+					petList.add(pet);
+					setPetList(petList);
+				}
+			}
+		}
+
+		matcher = GUARDIANS_OF_THE_RIFT_PATTERN.matcher(message);
+		if (matcher.find())
+		{
+			int kc = Integer.parseInt(matcher.group(1));
+			setKc("Guardians of the Rift", kc);
+		}
 	}
 
 	@VisibleForTesting
@@ -432,16 +603,26 @@ public class ChatCommandsPlugin extends Plugin
 		double seconds = timeStringToSeconds(matcher.group("pb"));
 		if (lastBossKill != null)
 		{
-			// Most bosses sent boss kill message, and then pb message, so we
+			// Most bosses send boss kill message, and then pb message, so we
 			// use the remembered lastBossKill
 			log.debug("Got personal best for {}: {}", lastBossKill, seconds);
 			setPb(lastBossKill, seconds);
 			lastPb = -1;
+			lastTeamSize = null;
 		}
 		else
 		{
 			// Some bosses send the pb message, and then the kill message!
 			lastPb = seconds;
+			try
+			{
+				lastTeamSize = matcher.group("teamsize");
+			}
+			catch (IllegalArgumentException ex)
+			{
+				// pattern has no team size
+				lastTeamSize = null;
+			}
 		}
 	}
 
@@ -500,37 +681,103 @@ public class ChatCommandsPlugin extends Plugin
 			}
 		}
 
+		// Adventure log - Counters
 		if (scrollInterfaceLoaded)
 		{
 			scrollInterfaceLoaded = false;
 
 			if (client.getLocalPlayer().getName().equals(pohOwner))
 			{
-				String counterText = Text.sanitizeMultilineText(client.getWidget(WidgetInfo.GENERIC_SCROLL_TEXT).getText());
-				Matcher mCounterText = ADVENTURE_LOG_PB_PATTERN.matcher(counterText);
-				while (mCounterText.find())
+				Widget parent = client.getWidget(WidgetInfo.DIARY_QUEST_WIDGET_TEXT);
+				// Each line is a separate static child
+				Widget[] children = parent.getStaticChildren();
+				String[] text = Arrays.stream(children)
+					.map(Widget::getText)
+					.map(Text::removeTags)
+					.toArray(String[]::new);
+
+				for (int i = 0; i < text.length; ++i)
 				{
-					String bossName = longBossName(mCounterText.group(1));
-					if (bossName.equalsIgnoreCase("chambers of xeric") ||
-						bossName.equalsIgnoreCase("chambers of xeric challenge mode"))
+					String boss = longBossName(text[i]);
+
+					for (i = i + 1; i < text.length; ++i)
 					{
-						Matcher mCoxRuns = ADVENTURE_LOG_COX_PB_PATTERN.matcher(mCounterText.group());
-						double bestPbTime = Double.MAX_VALUE;
-						while (mCoxRuns.find())
+						String line = text[i];
+						if (line.isEmpty())
 						{
-							bestPbTime = Math.min(timeStringToSeconds(mCoxRuns.group(1)), bestPbTime);
+							break;
 						}
-						// So we don't reset people's already saved PB's if they had one before the update
-						double currentPb = getPb(bossName);
-						if (currentPb == 0 || currentPb > bestPbTime)
+
+						Matcher matcher = ADVENTURE_LOG_PB_PATTERN.matcher(line);
+						if (matcher.find())
 						{
-							setPb(bossName, bestPbTime);
+							final double s = timeStringToSeconds(matcher.group("time"));
+							String teamSize = matcher.group("teamsize");
+							if (teamSize != null)
+							{
+								// 3 player -> 3 players
+								// 1 player -> Solo
+								// Solo -> Solo
+								// 2 players -> 2 players
+								if (teamSize.equals("1 player"))
+								{
+									teamSize = "Solo";
+								}
+								else if (teamSize.endsWith("player"))
+								{
+									teamSize = teamSize + "s";
+								}
+
+								log.debug("Found team-size adventure log PB for {} {}: {}", boss, teamSize, s);
+								setPb(boss + " " + teamSize, s);
+							}
+							else
+							{
+								log.debug("Found adventure log PB for {}: {}", boss, s);
+								setPb(boss, s);
+							}
 						}
 					}
-					else
+				}
+			}
+		}
+	}
+
+	@Subscribe
+	public void onScriptPostFired(ScriptPostFired scriptPostFired)
+	{
+		if (scriptPostFired.getScriptId() != ScriptID.COLLECTION_DRAW_LIST)
+		{
+			return;
+		}
+
+		if (pohOwner == null || pohOwner.equals(client.getLocalPlayer().getName()))
+		{
+			Widget collectionLogEntryHeader = client.getWidget(WidgetInfo.COLLECTION_LOG_ENTRY_HEADER);
+			if (collectionLogEntryHeader != null && collectionLogEntryHeader.getChildren() != null)
+			{
+				Widget entryTitle = collectionLogEntryHeader.getChild(COL_LOG_ENTRY_HEADER_TITLE_INDEX);
+				// Make sure that the player is looking in the All Pets tab of the collection log
+				if (entryTitle.getText().equals("All Pets"))
+				{
+					Widget collectionLogEntryItems = client.getWidget(WidgetInfo.COLLECTION_LOG_ENTRY_ITEMS);
+					if (collectionLogEntryItems != null && collectionLogEntryItems.getChildren() != null)
 					{
-						String pbTime = mCounterText.group(2);
-						setPb(bossName, timeStringToSeconds(pbTime));
+						List<Pet> petList = new ArrayList<>();
+						for (Widget child : collectionLogEntryItems.getChildren())
+						{
+							if (child.getOpacity() == 0)
+							{
+								Pet pet = Pet.findPet(Text.removeTags(child.getName()));
+								if (pet != null)
+								{
+									petList.add(pet);
+								}
+							}
+						}
+
+						setPetList(petList);
+						log.debug("Loaded {} pets", petList.size());
 					}
 				}
 			}
@@ -548,7 +795,7 @@ public class ChatCommandsPlugin extends Plugin
 			case KILL_LOGS_GROUP_ID:
 				bossLogLoaded = true;
 				break;
-			case GENERIC_SCROLL_GROUP_ID:
+			case DIARY_QUEST_GROUP_ID:
 				scrollInterfaceLoaded = true;
 				break;
 		}
@@ -562,6 +809,7 @@ public class ChatCommandsPlugin extends Plugin
 			case LOADING:
 			case HOPPING:
 				pohOwner = null;
+				break;
 		}
 	}
 
@@ -653,7 +901,6 @@ public class ChatCommandsPlugin extends Plugin
 		log.debug("Setting response {}", response);
 		final MessageNode messageNode = chatMessage.getMessageNode();
 		messageNode.setRuneLiteFormatMessage(response);
-		chatMessageManager.update(messageNode);
 		client.refreshChat();
 	}
 
@@ -743,7 +990,6 @@ public class ChatCommandsPlugin extends Plugin
 		log.debug("Setting response {}", response);
 		final MessageNode messageNode = chatMessage.getMessageNode();
 		messageNode.setRuneLiteFormatMessage(response);
-		chatMessageManager.update(messageNode);
 		client.refreshChat();
 	}
 
@@ -787,7 +1033,6 @@ public class ChatCommandsPlugin extends Plugin
 		log.debug("Setting response {}", response);
 		final MessageNode messageNode = chatMessage.getMessageNode();
 		messageNode.setRuneLiteFormatMessage(response);
-		chatMessageManager.update(messageNode);
 		client.refreshChat();
 	}
 
@@ -874,7 +1119,6 @@ public class ChatCommandsPlugin extends Plugin
 		log.debug("Setting response {}", response);
 		final MessageNode messageNode = chatMessage.getMessageNode();
 		messageNode.setRuneLiteFormatMessage(response);
-		chatMessageManager.update(messageNode);
 		client.refreshChat();
 	}
 
@@ -950,13 +1194,12 @@ public class ChatCommandsPlugin extends Plugin
 		log.debug("Setting response {}", response);
 		final MessageNode messageNode = chatMessage.getMessageNode();
 		messageNode.setRuneLiteFormatMessage(response);
-		chatMessageManager.update(messageNode);
 		client.refreshChat();
 	}
 
 	private boolean gambleCountSubmit(ChatInput chatInput, String value)
 	{
-		final int gc = client.getVar(Varbits.BA_GC);
+		final int gc = client.getVarbitValue(Varbits.BA_GC);
 		final String playerName = client.getLocalPlayer().getName();
 
 		executor.execute(() ->
@@ -968,6 +1211,108 @@ public class ChatCommandsPlugin extends Plugin
 			catch (Exception ex)
 			{
 				log.warn("unable to submit gamble count", ex);
+			}
+			finally
+			{
+				chatInput.resume();
+			}
+		});
+
+		return true;
+	}
+
+	/**
+	 * Looks up the pet list for the player who triggered !pets
+	 *
+	 * @param chatMessage The chat message containing the command.
+	 * @param message     The chat message in string format
+	 *                    <p>
+	 */
+	private void petListLookup(ChatMessage chatMessage, String message)
+	{
+		if (!config.pets())
+		{
+			return;
+		}
+
+		ChatMessageType type = chatMessage.getType();
+
+		final String player;
+		if (type.equals(ChatMessageType.PRIVATECHATOUT))
+		{
+			player = client.getLocalPlayer().getName();
+		}
+		else
+		{
+			player = Text.sanitize(chatMessage.getName());
+		}
+
+		Set<Integer> playerPetList;
+		try
+		{
+			playerPetList = chatClient.getPetList(player);
+		}
+		catch (IOException ex)
+		{
+			log.debug("unable to lookup pet list", ex);
+
+			if (player.equals(client.getLocalPlayer().getName()))
+			{
+				String response = "Open the 'All Pets' tab in the Collection Log to update your pet list";
+				log.debug("Setting response {}", response);
+				final MessageNode messageNode = chatMessage.getMessageNode();
+				messageNode.setValue(response);
+				client.refreshChat();
+			}
+			return;
+		}
+
+		ChatMessageBuilder responseBuilder = new ChatMessageBuilder()
+			.append(ChatColorType.NORMAL)
+			.append("Pets: ")
+			.append("(" + playerPetList.size() + ")");
+
+		// Append pets that the player owns
+		Pet[] pets = Pet.values();
+		for (Pet pet : pets)
+		{
+			if (playerPetList.contains(pet.getIconID()))
+			{
+				responseBuilder.append(" ").img(modIconIdx + pet.ordinal());
+			}
+		}
+
+		String response = responseBuilder.build();
+
+		log.debug("Setting response {}", response);
+		final MessageNode messageNode = chatMessage.getMessageNode();
+		messageNode.setRuneLiteFormatMessage(response);
+		client.refreshChat();
+	}
+
+	/**
+	 * Submits the pet list for the local player
+	 *
+	 * @param chatInput The chat message containing the command.
+	 * @param value     The chat message
+	 */
+	private boolean petListSubmit(ChatInput chatInput, String value)
+	{
+		final String playerName = client.getLocalPlayer().getName();
+
+		executor.execute(() ->
+		{
+			try
+			{
+				List<Integer> petList = getPetList().stream().map(Pet::getIconID).collect(Collectors.toList());
+				if (!petList.isEmpty())
+				{
+					chatClient.submitPetList(playerName, petList);
+				}
+			}
+			catch (Exception ex)
+			{
+				log.warn("unable to submit pet list", ex);
 			}
 			finally
 			{
@@ -1007,7 +1352,7 @@ public class ChatCommandsPlugin extends Plugin
 			ItemPrice item = retrieveFromList(results, search);
 
 			int itemId = item.getId();
-			int itemPrice = runeLiteConfig.useWikiItemPrices() && item.getWikiPrice() > 0 ? item.getWikiPrice() : item.getPrice();
+			int itemPrice = runeLiteConfig.useWikiItemPrices() ? itemManager.getWikiPrice(item) : item.getPrice();
 
 			final ChatMessageBuilder builder = new ChatMessageBuilder()
 				.append(ChatColorType.NORMAL)
@@ -1031,7 +1376,6 @@ public class ChatCommandsPlugin extends Plugin
 
 			log.debug("Setting response {}", response);
 			messageNode.setRuneLiteFormatMessage(response);
-			chatMessageManager.update(messageNode);
 			client.refreshChat();
 		}
 	}
@@ -1066,13 +1410,8 @@ public class ChatCommandsPlugin extends Plugin
 			search = message.substring(LEVEL_COMMAND_STRING.length() + 1);
 		}
 
-		search = SkillAbbreviations.getFullName(search);
-		final HiscoreSkill skill;
-		try
-		{
-			skill = HiscoreSkill.valueOf(search.toUpperCase());
-		}
-		catch (IllegalArgumentException i)
+		final HiscoreSkill skill = findHiscoreSkill(search);
+		if (skill == null)
 		{
 			return;
 		}
@@ -1081,16 +1420,14 @@ public class ChatCommandsPlugin extends Plugin
 
 		try
 		{
-			final SingleHiscoreSkillResult result = hiscoreClient.lookup(lookup.getName(), skill, lookup.getEndpoint());
-
+			final HiscoreResult result = hiscoreClient.lookup(lookup.getName(), lookup.getEndpoint());
 			if (result == null)
 			{
 				log.warn("unable to look up skill {} for {}: not found", skill, search);
 				return;
 			}
 
-			final Skill hiscoreSkill = result.getSkill();
-
+			final Skill hiscoreSkill = result.getSkill(skill);
 			ChatMessageBuilder chatMessageBuilder = new ChatMessageBuilder()
 				.append(ChatColorType.NORMAL)
 				.append("Level ")
@@ -1115,7 +1452,6 @@ public class ChatCommandsPlugin extends Plugin
 			log.debug("Setting response {}", response);
 			final MessageNode messageNode = chatMessage.getMessageNode();
 			messageNode.setRuneLiteFormatMessage(response);
-			chatMessageManager.update(messageNode);
 			client.refreshChat();
 		}
 		catch (IOException ex)
@@ -1131,21 +1467,11 @@ public class ChatCommandsPlugin extends Plugin
 			return;
 		}
 
-		ChatMessageType type = chatMessage.getType();
-
-		String player;
-		if (type == ChatMessageType.PRIVATECHATOUT)
-		{
-			player = client.getLocalPlayer().getName();
-		}
-		else
-		{
-			player = Text.sanitize(chatMessage.getName());
-		}
+		final HiscoreLookup lookup = getCorrectLookupFor(chatMessage);
 
 		try
 		{
-			HiscoreResult playerStats = hiscoreClient.lookup(player);
+			HiscoreResult playerStats = hiscoreClient.lookup(lookup.getName(), lookup.getEndpoint());
 
 			if (playerStats == null)
 			{
@@ -1200,7 +1526,6 @@ public class ChatCommandsPlugin extends Plugin
 			log.debug("Setting response {}", response);
 			final MessageNode messageNode = chatMessage.getMessageNode();
 			messageNode.setRuneLiteFormatMessage(response);
-			chatMessageManager.update(messageNode);
 			client.refreshChat();
 		}
 		catch (IOException ex)
@@ -1328,7 +1653,6 @@ public class ChatCommandsPlugin extends Plugin
 			log.debug("Setting response {}", response);
 			final MessageNode messageNode = chatMessage.getMessageNode();
 			messageNode.setRuneLiteFormatMessage(response);
-			chatMessageManager.update(messageNode);
 			client.refreshChat();
 		}
 		catch (IOException ex)
@@ -1422,7 +1746,6 @@ public class ChatCommandsPlugin extends Plugin
 			log.debug("Setting response {}", response);
 			final MessageNode messageNode = chatMessage.getMessageNode();
 			messageNode.setRuneLiteFormatMessage(response);
-			chatMessageManager.update(messageNode);
 			client.refreshChat();
 		}
 		catch (IOException ex)
@@ -1449,12 +1772,13 @@ public class ChatCommandsPlugin extends Plugin
 			return new HiscoreLookup(localPlayer.getName(), hiscoreEndpoint);
 		}
 
-		// Public chat on a leagues world is always league hiscores, regardless of icon
 		if (chatMessage.getType() == ChatMessageType.PUBLICCHAT || chatMessage.getType() == ChatMessageType.MODCHAT)
 		{
-			if (client.getWorldType().contains(WorldType.LEAGUE))
+			// Public chat on a seasonal world is always seasonal or tournament hiscores, regardless of icon
+			HiscoreEndpoint endpoint = HiscoreEndpoint.fromWorldTypes(client.getWorldType());
+			if (endpoint != HiscoreEndpoint.NORMAL)
 			{
-				return new HiscoreLookup(player, HiscoreEndpoint.LEAGUE);
+				return new HiscoreLookup(player, endpoint);
 			}
 		}
 
@@ -1500,9 +1824,11 @@ public class ChatCommandsPlugin extends Plugin
 	private HiscoreEndpoint getLocalHiscoreEndpointType()
 	{
 		EnumSet<WorldType> worldType = client.getWorldType();
-		if (worldType.contains(WorldType.LEAGUE))
+		HiscoreEndpoint endpoint = HiscoreEndpoint.fromWorldTypes(worldType);
+		if (endpoint != HiscoreEndpoint.NORMAL)
 		{
-			return HiscoreEndpoint.LEAGUE;
+			// leagues/dmmt or dmm
+			return endpoint;
 		}
 
 		return toEndPoint(client.getAccountType());
@@ -1586,6 +1912,8 @@ public class ChatCommandsPlugin extends Plugin
 			case "dusk":
 			case "dawn":
 			case "gargs":
+			case "ggs":
+			case "gg":
 				return "Grotesque Guardians";
 
 			case "crazy arch":
@@ -1662,15 +1990,57 @@ public class ChatCommandsPlugin extends Plugin
 			case "herbi":
 				return "Herbiboar";
 
-			// cox
+			// Chambers of Xeric
 			case "cox":
 			case "xeric":
 			case "chambers":
 			case "olm":
 			case "raids":
 				return "Chambers of Xeric";
+			case "cox 1":
+			case "cox solo":
+				return "Chambers of Xeric Solo";
+			case "cox 2":
+			case "cox duo":
+				return "Chambers of Xeric 2 players";
+			case "cox 3":
+				return "Chambers of Xeric 3 players";
+			case "cox 4":
+				return "Chambers of Xeric 4 players";
+			case "cox 5":
+				return "Chambers of Xeric 5 players";
+			case "cox 6":
+				return "Chambers of Xeric 6 players";
+			case "cox 7":
+				return "Chambers of Xeric 7 players";
+			case "cox 8":
+				return "Chambers of Xeric 8 players";
+			case "cox 9":
+				return "Chambers of Xeric 9 players";
+			case "cox 10":
+				return "Chambers of Xeric 10 players";
+			case "cox 11-15":
+			case "cox 11":
+			case "cox 12":
+			case "cox 13":
+			case "cox 14":
+			case "cox 15":
+				return "Chambers of Xeric 11-15 players";
+			case "cox 16-23":
+			case "cox 16":
+			case "cox 17":
+			case "cox 18":
+			case "cox 19":
+			case "cox 20":
+			case "cox 21":
+			case "cox 22":
+			case "cox 23":
+				return "Chambers of Xeric 16-23 players";
+			case "cox 24":
+			case "cox 24+":
+				return "Chambers of Xeric 24+ players";
 
-			// cox cm
+			// Chambers of Xeric Challenge Mode
 			case "cox cm":
 			case "xeric cm":
 			case "chambers cm":
@@ -1678,19 +2048,100 @@ public class ChatCommandsPlugin extends Plugin
 			case "raids cm":
 			case "chambers of xeric - challenge mode":
 				return "Chambers of Xeric Challenge Mode";
+			case "cox cm 1":
+			case "cox cm solo":
+				return "Chambers of Xeric Challenge Mode Solo";
+			case "cox cm 2":
+			case "cox cm duo":
+				return "Chambers of Xeric Challenge Mode 2 players";
+			case "cox cm 3":
+				return "Chambers of Xeric Challenge Mode 3 players";
+			case "cox cm 4":
+				return "Chambers of Xeric Challenge Mode 4 players";
+			case "cox cm 5":
+				return "Chambers of Xeric Challenge Mode 5 players";
+			case "cox cm 6":
+				return "Chambers of Xeric Challenge Mode 6 players";
+			case "cox cm 7":
+				return "Chambers of Xeric Challenge Mode 7 players";
+			case "cox cm 8":
+				return "Chambers of Xeric Challenge Mode 8 players";
+			case "cox cm 9":
+				return "Chambers of Xeric Challenge Mode 9 players";
+			case "cox cm 10":
+				return "Chambers of Xeric Challenge Mode 10 players";
+			case "cox cm 11-15":
+			case "cox cm 11":
+			case "cox cm 12":
+			case "cox cm 13":
+			case "cox cm 14":
+			case "cox cm 15":
+				return "Chambers of Xeric Challenge Mode 11-15 players";
+			case "cox cm 16-23":
+			case "cox cm 16":
+			case "cox cm 17":
+			case "cox cm 18":
+			case "cox cm 19":
+			case "cox cm 20":
+			case "cox cm 21":
+			case "cox cm 22":
+			case "cox cm 23":
+				return "Chambers of Xeric Challenge Mode 16-23 players";
+			case "cox cm 24":
+			case "cox cm 24+":
+				return "Chambers of Xeric Challenge Mode 24+ players";
 
-			// tob
+			// Theatre of Blood
 			case "tob":
 			case "theatre":
 			case "verzik":
 			case "verzik vitur":
 			case "raids 2":
 				return "Theatre of Blood";
+			case "tob 1":
+			case "tob solo":
+				return "Theatre of Blood Solo";
+			case "tob 2":
+			case "tob duo":
+				return "Theatre of Blood 2 players";
+			case "tob 3":
+				return "Theatre of Blood 3 players";
+			case "tob 4":
+				return "Theatre of Blood 4 players";
+			case "tob 5":
+				return "Theatre of Blood 5 players";
 
-			// agility course
-			case "prif":
-			case "prifddinas":
-				return "Prifddinas Agility Course";
+			// Theatre of Blood Entry Mode
+			case "theatre of blood: story mode":
+			case "tob sm":
+			case "tob story mode":
+			case "tob story":
+			case "Theatre of Blood: Entry Mode":
+			case "tob em":
+			case "tob entry mode":
+			case "tob entry":
+				return "Theatre of Blood Entry Mode";
+
+			// Theatre of Blood Hard Mode
+			case "theatre of blood: hard mode":
+			case "tob cm":
+			case "tob hm":
+			case "tob hard mode":
+			case "tob hard":
+			case "hmt":
+				return "Theatre of Blood Hard Mode";
+			case "hmt 1":
+			case "hmt solo":
+				return "Theatre of Blood Hard Mode Solo";
+			case "hmt 2":
+			case "hmt duo":
+				return "Theatre of Blood Hard Mode 2 players";
+			case "hmt 3":
+				return "Theatre of Blood Hard Mode 3 players";
+			case "hmt 4":
+				return "Theatre of Blood Hard Mode 4 players";
+			case "hmt 5":
+				return "Theatre of Blood Hard Mode 5 players";
 
 			// The Gauntlet
 			case "gaunt":
@@ -1702,13 +2153,24 @@ public class ChatCommandsPlugin extends Plugin
 			case "cgaunt":
 			case "cgauntlet":
 			case "the corrupted gauntlet":
+			case "cg":
 				return "Corrupted Gauntlet";
 
+			// The Nightmare
 			case "nm":
 			case "tnm":
 			case "nmare":
 			case "the nightmare":
 				return "Nightmare";
+
+			// Phosani's Nightmare
+			case "pnm":
+			case "phosani":
+			case "phosanis":
+			case "phosani nm":
+			case "phosani nightmare":
+			case "phosanis nightmare":
+				return "Phosani's Nightmare";
 
 			// Hallowed Sepulchre
 			case "hs":
@@ -1730,6 +2192,26 @@ public class ChatCommandsPlugin extends Plugin
 			case "hs5":
 			case "hs 5":
 				return "Hallowed Sepulchre Floor 5";
+
+			// Prifddinas Agility Course
+			case "prif":
+			case "prifddinas":
+				return "Prifddinas Agility Course";
+
+			// Shayzien Basic Agility Course
+			case "shayb":
+			case "sbac":
+			case "shayzienbasic":
+			case "shayzien basic":
+				return "Shayzien Basic Agility Course";
+
+			// Shayzien Advanced Agility Course
+			case "shaya":
+			case "saac":
+			case "shayadv":
+			case "shayadvanced":
+			case "shayzien advanced":
+				return "Shayzien Advanced Agility Course";
 
 			// Ape Atoll Agility
 			case "aa":
@@ -1856,8 +2338,112 @@ public class ChatCommandsPlugin extends Plugin
 			case "jad 6":
 				return "TzHaar-Ket-Rak's Sixth Challenge";
 
+			// Guardians of the Rift
+			case "gotr":
+			case "runetodt":
+				return "Guardians of the Rift";
+
 			default:
 				return WordUtils.capitalize(boss);
 		}
+	}
+
+	private static String longSkillName(String skill)
+	{
+		switch (skill.toUpperCase())
+		{
+			case "ATK":
+			case "ATT":
+				return net.runelite.api.Skill.ATTACK.getName();
+			case "DEF":
+				return net.runelite.api.Skill.DEFENCE.getName();
+			case "STR":
+				return net.runelite.api.Skill.STRENGTH.getName();
+			case "HEALTH":
+			case "HIT":
+			case "HITPOINT":
+			case "HP":
+				return net.runelite.api.Skill.HITPOINTS.getName();
+			case "RANGE":
+			case "RANGING":
+			case "RNG":
+				return net.runelite.api.Skill.RANGED.getName();
+			case "PRAY":
+				return net.runelite.api.Skill.PRAYER.getName();
+			case "MAG":
+			case "MAGE":
+				return net.runelite.api.Skill.MAGIC.getName();
+			case "COOK":
+				return net.runelite.api.Skill.COOKING.getName();
+			case "WC":
+			case "WOOD":
+			case "WOODCUT":
+				return net.runelite.api.Skill.WOODCUTTING.getName();
+			case "FLETCH":
+				return net.runelite.api.Skill.FLETCHING.getName();
+			case "FISH":
+				return net.runelite.api.Skill.FISHING.getName();
+			case "FM":
+			case "FIRE":
+				return net.runelite.api.Skill.FIREMAKING.getName();
+			case "CRAFT":
+				return net.runelite.api.Skill.CRAFTING.getName();
+			case "SMITH":
+				return net.runelite.api.Skill.SMITHING.getName();
+			case "MINE":
+				return net.runelite.api.Skill.MINING.getName();
+			case "HL":
+			case "HERB":
+				return net.runelite.api.Skill.HERBLORE.getName();
+			case "AGI":
+			case "AGIL":
+				return net.runelite.api.Skill.AGILITY.getName();
+			case "THIEF":
+				return net.runelite.api.Skill.THIEVING.getName();
+			case "SLAY":
+				return net.runelite.api.Skill.SLAYER.getName();
+			case "FARM":
+				return net.runelite.api.Skill.FARMING.getName();
+			case "RC":
+			case "RUNE":
+			case "RUNECRAFTING":
+				return net.runelite.api.Skill.RUNECRAFT.getName();
+			case "HUNT":
+				return net.runelite.api.Skill.HUNTER.getName();
+			case "CON":
+			case "CONSTRUCT":
+				return net.runelite.api.Skill.CONSTRUCTION.getName();
+			case "ALL":
+			case "TOTAL":
+				return net.runelite.api.Skill.OVERALL.getName();
+			default:
+				return skill;
+		}
+	}
+
+	private static HiscoreSkill findHiscoreSkill(String search)
+	{
+		String s = longSkillName(search);
+		if (s == search)
+		{
+			s = longBossName(search);
+		}
+		for (HiscoreSkill skill : HiscoreSkill.values())
+		{
+			if (skill.getName().equals(s))
+			{
+				return skill;
+			}
+		}
+		return null;
+	}
+
+	private int tobTeamSize()
+	{
+		return Math.min(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD_ORB1), 1) +
+			Math.min(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD_ORB2), 1) +
+			Math.min(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD_ORB3), 1) +
+			Math.min(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD_ORB4), 1) +
+			Math.min(client.getVarbitValue(Varbits.THEATRE_OF_BLOOD_ORB5), 1);
 	}
 }

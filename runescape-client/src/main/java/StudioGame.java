@@ -4,65 +4,71 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("ij")
+@ObfuscatedName("ke")
 @Implements("StudioGame")
-public enum StudioGame implements Enumerated {
-	@ObfuscatedName("f")
+public enum StudioGame implements MouseWheel {
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "Lij;"
+		descriptor = "Lke;"
 	)
 	@Export("runescape")
 	runescape("runescape", "RuneScape", 0),
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "Lij;"
+		descriptor = "Lke;"
 	)
 	@Export("stellardawn")
 	stellardawn("stellardawn", "Stellar Dawn", 1),
-	@ObfuscatedName("u")
+	@ObfuscatedName("l")
 	@ObfuscatedSignature(
-		descriptor = "Lij;"
+		descriptor = "Lke;"
 	)
 	@Export("game3")
 	game3("game3", "Game 3", 2),
-	@ObfuscatedName("p")
+	@ObfuscatedName("k")
 	@ObfuscatedSignature(
-		descriptor = "Lij;"
+		descriptor = "Lke;"
 	)
 	@Export("game4")
 	game4("game4", "Game 4", 3),
-	@ObfuscatedName("b")
+	@ObfuscatedName("a")
 	@ObfuscatedSignature(
-		descriptor = "Lij;"
+		descriptor = "Lke;"
 	)
 	@Export("game5")
 	game5("game5", "Game 5", 4),
-	@ObfuscatedName("e")
+	@ObfuscatedName("m")
 	@ObfuscatedSignature(
-		descriptor = "Lij;"
+		descriptor = "Lke;"
 	)
 	@Export("oldscape")
 	oldscape("oldscape", "RuneScape 2007", 5);
 
-	@ObfuscatedName("k")
+	@ObfuscatedName("jb")
+	@ObfuscatedGetter(
+		intValue = 1529760587
+	)
+	@Export("cameraYaw")
+	static int cameraYaw;
+	@ObfuscatedName("p")
 	@Export("name")
 	public final String name;
-	@ObfuscatedName("g")
+	@ObfuscatedName("s")
 	@ObfuscatedGetter(
-		intValue = 136753843
+		intValue = -2065228417
 	)
 	@Export("id")
 	final int id;
 
 	StudioGame(String var3, String var4, int var5) {
 		this.name = var3; // L: 17
-		this.id = var5; // L: 18
+		this.id = var5;
 	} // L: 19
 
-	@ObfuscatedName("f")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(I)I",
-		garbageValue = "-1000839247"
+		descriptor = "(B)I",
+		garbageValue = "30"
 	)
 	@Export("rsOrdinal")
 	public int rsOrdinal() {
@@ -71,22 +77,10 @@ public enum StudioGame implements Enumerated {
 
 	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(II)Lkt;",
-		garbageValue = "830101671"
+		descriptor = "(IB)Ljava/lang/String;",
+		garbageValue = "-40"
 	)
-	public static HitSplatDefinition method4391(int var0) {
-		HitSplatDefinition var1 = (HitSplatDefinition)HitSplatDefinition.HitSplatDefinition_cached.get((long)var0); // L: 52
-		if (var1 != null) { // L: 53
-			return var1;
-		} else {
-			byte[] var2 = HitSplatDefinition.HitSplatDefinition_archive.takeFile(32, var0); // L: 54
-			var1 = new HitSplatDefinition(); // L: 55
-			if (var2 != null) { // L: 56
-				var1.decode(new Buffer(var2));
-			}
-
-			HitSplatDefinition.HitSplatDefinition_cached.put(var1, (long)var0); // L: 57
-			return var1; // L: 58
-		}
+	static String method5590(int var0) {
+		return "<img=" + var0 + ">"; // L: 18
 	}
 }

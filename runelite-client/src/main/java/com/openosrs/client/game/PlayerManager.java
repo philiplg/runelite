@@ -31,12 +31,11 @@ import net.runelite.api.events.PlayerDespawned;
 import net.runelite.api.kit.KitType;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.game.FriendChatManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.ItemMapping;
+import net.runelite.client.hiscore.HiscoreClient;
+import net.runelite.client.hiscore.HiscoreResult;
 import net.runelite.client.util.PvPUtil;
-import net.runelite.http.api.hiscore.HiscoreClient;
-import net.runelite.http.api.hiscore.HiscoreResult;
 import net.runelite.http.api.item.ItemEquipmentStats;
 import net.runelite.http.api.item.ItemStats;
 import okhttp3.OkHttpClient;
@@ -50,7 +49,6 @@ public class PlayerManager
 	private final Client client;
 	private final ItemManager itemManager;
 	private final EventBus eventBus;
-	private final FriendChatManager friendChatManager;
 	private final Map<String, PlayerContainer> playerMap = new ConcurrentHashMap<>();
 	private final Map<String, HiscoreResult> resultCache = new ConcurrentHashMap<>();
 	private final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
@@ -60,14 +58,12 @@ public class PlayerManager
 		final Client client,
 		final EventBus eventBus,
 		final ItemManager itemManager,
-		final FriendChatManager friendChatManager,
 		final OkHttpClient okHttpClient
 	)
 	{
 		this.client = client;
 		this.itemManager = itemManager;
 		this.eventBus = eventBus;
-		this.friendChatManager = friendChatManager;
 		this.hiscoreClient = new HiscoreClient(okHttpClient);
 
 		eventBus.register(this);
@@ -219,7 +215,7 @@ public class PlayerManager
 		PlayerContainer player = playerMap.computeIfAbsent(event.getPlayer().getName(), s -> new PlayerContainer(event.getPlayer()));
 		update(player);
 		player.setFriend(client.isFriended(player.getName(), false));
-		player.setClan(friendChatManager.isMember(player.getName()));
+		player.setClan(event.getPlayer().isFriendsChatMember());
 	}
 
 	@Subscribe
@@ -293,11 +289,6 @@ public class PlayerManager
 
 		for (KitType kitType : KitType.values())
 		{
-			if (kitType.equals(KitType.RING) || kitType.equals(KitType.AMMUNITION))
-			{
-				continue;
-			}
-
 			final int id = player.getPlayer().getPlayerComposition().getEquipmentId(kitType);
 
 			if (id == -1)
@@ -323,7 +314,7 @@ public class PlayerManager
 					case ItemID.MAGIC_SHORTBOW:
 					case ItemID.MAGIC_SHORTBOW_20558:
 					case ItemID.MAGIC_SHORTBOW_I:
-						rangeStr += +55;
+						rangeStr += 55;
 						break;
 					case ItemID.DARK_BOW:
 					case ItemID.DARK_BOW_12765:
@@ -331,16 +322,16 @@ public class PlayerManager
 					case ItemID.DARK_BOW_12767:
 					case ItemID.DARK_BOW_12768:
 					case ItemID.DARK_BOW_20408:
-						rangeStr += +60;
+						rangeStr += 60;
 						break;
 					case ItemID.RUNE_CROSSBOW:
 					case ItemID.RUNE_CROSSBOW_23601:
-						rangeStr += +117;
+						rangeStr += 117;
 						break;
 					case ItemID.DRAGON_CROSSBOW:
 					case ItemID.ARMADYL_CROSSBOW:
 					case ItemID.ARMADYL_CROSSBOW_23611:
-						rangeStr += +122;
+						rangeStr += 122;
 						break;
 				}
 			}

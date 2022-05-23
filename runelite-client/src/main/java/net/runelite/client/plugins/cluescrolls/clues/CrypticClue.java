@@ -24,10 +24,10 @@
  */
 package net.runelite.client.plugins.cluescrolls.clues;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.Set;
+import java.util.List;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import net.runelite.api.NPC;
@@ -51,7 +51,7 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 @Getter
 public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueScroll, ObjectClueScroll
 {
-	public static final Set<CrypticClue> CLUES = ImmutableSet.of(
+	public static final List<CrypticClue> CLUES = ImmutableList.of(
 		new CrypticClue("Show this to Sherlock.", "Sherlock", new WorldPoint(2733, 3415, 0), "Sherlock is located to the east of the Sorcerer's tower in Seers' Village."),
 		new CrypticClue("Talk to the bartender of the Rusty Anchor in Port Sarim.", "Bartender", new WorldPoint(3045, 3256, 0), "The Rusty Anchor is located in the north of Port Sarim."),
 		new CrypticClue("The keeper of Melzars... Spare? Skeleton? Anar?", "Oziach", new WorldPoint(3068, 3516, 0), "Speak to Oziach in Edgeville."),
@@ -61,7 +61,7 @@ public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueSc
 		new CrypticClue("Search the bucket in the Port Sarim jail.", BUCKET_9568, new WorldPoint(3013, 3179, 0), "Talk to Shantay & identify yourself as an outlaw, refuse to pay the 5gp fine twice and you will be sent to the Port Sarim jail."),
 		new CrypticClue("Search the crates in a bank in Varrock.", CRATE_5107, new WorldPoint(3187, 9825, 0), "Search in the basement of the West Varrock bank."),
 		new CrypticClue("Falo the bard wants to see you.", "Falo the Bard", new WorldPoint(2689, 3550, 0), "Speak to Falo the Bard located between Seers' Village and Rellekka. Southwest of fairy ring CJR."),
-		new CrypticClue("Search a bookcase in the Wizards tower.", BOOKCASE_12539, new WorldPoint(3113, 3159, 0), "The bookcase located on the ground floor of the Wizards' Tower."),
+		new CrypticClue("Search a bookcase in the Wizards tower.", BOOKCASE_12539, new WorldPoint(3113, 3159, 0), "The bookcase located on the ground floor of the Wizards' Tower. Fairy ring DIS."),
 		new CrypticClue("Come have a cip with this great soot covered denizen.", "Miner Magnus", new WorldPoint(2527, 3891, 0), "Talk to Miner Magnus on Miscellania, east of the fairy ring CIP. Answer: 8", "How many coal rocks are around here?"),
 		new CrypticClue("Citric cellar.", "Heckel Funch", new WorldPoint(2490, 3488, 0), "Speak to Heckel Funch on the first floor in the Grand Tree."),
 		new CrypticClue("I burn between heroes and legends.", "Candle maker", new WorldPoint(2799, 3438, 0), "Speak to the Candle maker in Catherby."),
@@ -76,7 +76,6 @@ public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueSc
 		new CrypticClue("His bark is worse than his bite.", "Barker", new WorldPoint(3499, 3503, 0), "Speak to the Barker at Canifis's Barkers' Haberdashery."),
 		new CrypticClue("The beasts to my east snap claws and tails, The rest to my west can slide and eat fish. The force to my north will jump and they'll wail, Come dig by my fire and make a wish.", new WorldPoint(2598, 3267, 0), "Dig by the torch in the Ardougne Zoo, between the penguins and the scorpions."),
 		new CrypticClue("A town with a different sort of night-life is your destination. Search for some crates in one of the houses.", CRATE_24344, new WorldPoint(3498, 3507, 0), "Search the crate inside of the clothes shop in Canifis."),
-		new CrypticClue("Stop crying! Talk to the head.", "Head mourner", new WorldPoint(2042, 4630, 0), "Talk to the Head mourner in the mourner headquarters in West Ardougne."),
 		new CrypticClue("Search the crate near a cart in Port Khazard.", CRATE_366, new WorldPoint(2660, 3149, 0), "Search by the southern Khazard General Store in Port Khazard."),
 		new CrypticClue("Speak to the bartender of the Blue Moon Inn in Varrock.", "Bartender", new WorldPoint(3226, 3399, 0), "Talk to the bartender in Blue Moon Inn in Varrock."),
 		new CrypticClue("This aviator is at the peak of his profession.", "Captain Bleemadge", new WorldPoint(2847, 3499, 0), "Captain Bleemadge, the gnome glider pilot, is found at the top of White Wolf Mountain."),
@@ -154,11 +153,10 @@ public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueSc
 		new CrypticClue("Search the crates in the Port Sarim Fishing shop.", CRATE_9534, new WorldPoint(3012, 3222, 0), "Search the crates, by the door, in Gerrant's Fishy Business in Port Sarim."),
 		new CrypticClue("Speak to The Lady of the Lake.", "The Lady of the Lake", new WorldPoint(2924, 3405, 0), "Talk to The Lady of the Lake in Taverley."),
 		new CrypticClue("Rotting next to a ditch. Dig next to the fish.", new WorldPoint(3547, 3183, 0), "Dig next to a fishing spot on the south-east side of Burgh de Rott."),
-		new CrypticClue("The King's magic won't be wasted by me.", "Guardian Mummy", new WorldPoint(1934, 4427, 0), "Talk to the Guardian mummy inside the Pyramid Plunder minigame in Sophanem."),
+		new CrypticClue("The King's magic shouldn't be wasted by me.", "Guardian mummy", new WorldPoint(1934, 4427, 0), "Talk to the Guardian mummy inside the Pyramid Plunder minigame in Sophanem."),
 		new CrypticClue("Dig where the forces of Zamorak and Saradomin collide.", new WorldPoint(3049, 4839, 0), "Dig next to the law rift in the Abyss."),
 		new CrypticClue("Search the boxes in the goblin house near Lumbridge.", BOXES, new WorldPoint(3245, 3245, 0), "Goblin house on the eastern side of the river outside of Lumbridge."),
 		new CrypticClue("W marks the spot.", new WorldPoint(2867, 3546, 0), "Dig in the middle of the Warriors' Guild entrance hall."),
-		new CrypticClue("There is no 'worthier' lord.", "Lord Iorwerth", new WorldPoint(2205, 3252, 0), "Speak to Lord Iorwerth in the elven camp southwest of Prifddinas."),
 		new CrypticClue("Surviving.", "Sir Vyvin", new WorldPoint(2983, 3338, 0), "Talk to Sir Vyvin on the second floor of Falador castle."),
 		new CrypticClue("My name is like a tree, yet it is spelt with a 'g'. Come see the fur which is right near me.", "Wilough", new WorldPoint(3221, 3435, 0), "Speak to Wilough, next to the Fur Merchant in Varrock Square."),
 		new CrypticClue("Speak to Jatix in Taverley.", "Jatix", new WorldPoint(2898, 3428, 0), "Jatix is found in the middle of Taverley."),
@@ -265,13 +263,11 @@ public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueSc
 		new CrypticClue("Talk to the Squire in the White Knights' castle in Falador.", "Squire", new WorldPoint(2977, 3343, 0), "The squire is located in the courtyard of the White Knights' Castle."),
 		new CrypticClue("Thanks, Grandma!", "Tynan", new WorldPoint(1836, 3786, 0), "Tynan can be found in the north-east corner of Port Piscarilius."),
 		new CrypticClue("In a town where everyone has perfect vision, seek some locked drawers in a house that sits opposite a workshop.", "Chicken", DRAWERS_25766, new WorldPoint(2709, 3478, 0), "The Seers' Village house south of the Elemental Workshop entrance. Kill any Chicken to obtain a key."),
-		new CrypticClue("The treasure is buried in a small building full of bones. Here is a hint: it's not near a graveyard.", new WorldPoint(3356, 3507, 0), "In the western building near the Limestone quarry east of Varrock. Dig south of the box of bones in the smaller building."),
 		new CrypticClue("Search the crates in East Ardougne's general store.", CRATE_357, new WorldPoint(2615, 3291, 0), "Located south of the Ardougne church."),
 		new CrypticClue("Come brave adventurer, your sense is on fire. If you talk to me, it's an old god you desire.", "Viggora", null, "Speak to Viggora while wearing a ring of visibility and a Ghostspeak amulet."),
 		new CrypticClue("2 musical birds. Dig in front of the spinning light.", new WorldPoint(2671, 10396, 0), "Dig in front of the spinning light in Ping and Pong's room inside the Iceberg"),
 		new CrypticClue("Search the wheelbarrow in Rimmington mine.", WHEELBARROW_9625, new WorldPoint(2978, 3239, 0), "The Rimmington mining site is located north of Rimmington."),
 		new CrypticClue("Belladonna, my dear. If only I had gloves, then I could hold you at last.", "Tool Leprechaun", new WorldPoint(3088, 3357, 0), "Talk to Tool Leprechaun at Draynor Manor."),
-		new CrypticClue("Impossible to make angry", "Abbot Langley", new WorldPoint(3059, 3486, 0), "Speak to Abbot Langley at the Edgeville Monastery."),
 		new CrypticClue("Search the crates in Horvik's armoury.", CRATE_5106, new WorldPoint(3228, 3433, 0), "Horvik's in Varrock."),
 		new CrypticClue("Ghommal wishes to be impressed by how strong your equipment is.", "Ghommal", new WorldPoint(2878, 3546, 0), "Speak to Ghommal at the Warriors' Guild with a total Melee Strength bonus of over 100."),
 		new CrypticClue("Shhhh!", "Logosia", new WorldPoint(1633, 3808, 0), "Speak to Logosia in the Arceuus Library's ground floor."),
@@ -324,12 +320,21 @@ public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueSc
 		new CrypticClue("Observing someone in a swamp, under the telescope lies treasure.", new WorldPoint(2221, 3091, 0), "Dig next to the telescope on Broken Handz's island in the poison wastes. (Accessible only through fairy ring DLR)"),
 		new CrypticClue("A general who sets a 'shining' example.", "General Hining", new WorldPoint(2186, 3148, 0), "Talk to General Hining in Tyras Camp."),
 		new CrypticClue("Has no one told you it is rude to ask a lady her age?", "Mawrth", new WorldPoint(2333, 3165, 0), "Talk to Mawrth in Lletya."),
-		new CrypticClue("Elvish onions.", new WorldPoint(3303, 6092, 0), "Dig in the onion patch east of the Prifddinas allotments.")
+		new CrypticClue("Elvish onions.", new WorldPoint(3303, 6092, 0), "Dig in the onion patch east of the Prifddinas allotments."),
+		new CrypticClue("Dig by the Giant's Den entrance, looking out over Lake Molch.", new WorldPoint(1418, 3591, 0), "South-east of Lake Molch in Zeah, outside the cave entrance."),
+		new CrypticClue("Search the crates in the fruit store just east of the Hosidius town centre.", CRATES_27533, new WorldPoint(1799, 3613, 0), "Search the crates in the back room of the Hosidius fruit store."),
+		new CrypticClue("A graceful man of many colours, his crates must be full of many delights.", "Hill Giant", CRATE_42067, new WorldPoint(1506, 3590, 2), "Kill any Hill Giant for a medium key. Then search the crate on the top floor of Osten's clothing shop in Shayzien."),
+		new CrypticClue("Search the basket of apples in an orchard, south of the unknown grave surrounded by white roses.", APPLE_BASKET, new WorldPoint(1718, 3626, 0), "Search the middle apple basket in the apple orchard north of Hosidius."),
+		new CrypticClue("Dig in the lair of red wings, within the temple of the Sun and Moon.", new WorldPoint(1820, 9935, 0), "Forthos Dungeon. In the center of the red dragons."),
+		new CrypticClue("Within the town of Lumbridge lives a man named Bob. He walks out of his door and takes 1 step east, 7 steps north, 5 steps west and 1 step south. Once he arrives, he digs a hole and buries his treasure.", new WorldPoint(3230, 3209, 0), "Just west of the bush outside Bob's axe shop in Lumbridge."),
+		new CrypticClue("Try not to let yourself be dazzled when you search these drawers.", DRAWERS_350, new WorldPoint(2561, 3323, 0), "Search the western drawers in Jimmy Dazzler's home near the East Ardougne Rat Pits."),
+		new CrypticClue("The Big High War God left his mark on this place.", new WorldPoint(3572, 4372, 0), "Dig anywhere in Yu'biusk. Fairy ring BLQ.")
 	);
 
 	private final String text;
 	private final String npc;
 	private final int objectId;
+	@Nullable
 	private final WorldPoint location;
 	private final String solution;
 	@Nullable
@@ -371,7 +376,7 @@ public class CrypticClue extends ClueScroll implements TextClueScroll, NpcClueSc
 		this(text, npc, objectId, location, solution, null);
 	}
 
-	private CrypticClue(String text, String npc, int objectId, WorldPoint location, String solution, @Nullable String questionText)
+	private CrypticClue(String text, String npc, int objectId, @Nullable WorldPoint location, String solution, @Nullable String questionText)
 	{
 		this.text = text;
 		this.npc = npc;

@@ -28,7 +28,7 @@ plugins {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
     maven(url = "https://raw.githubusercontent.com/open-osrs/hosting/master")
 }
 
@@ -36,8 +36,4 @@ dependencies {
     implementation(gradleApi())
     implementation(group = "net.runelite", name = "fernflower", version = "07082019")
     implementation(group = "org.json", name = "json", version = "20190722")
-}
-
-kotlinDslPluginOptions {
-    experimentalWarning.set(false)
 }

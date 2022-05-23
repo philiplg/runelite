@@ -1,69 +1,109 @@
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import net.runelite.mapping.Export;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("oz")
-public class class401 {
-	@ObfuscatedName("n")
-	static final int[] field4284;
-	@ObfuscatedName("l")
-	static final int[] field4285;
+@ObfuscatedName("ov")
+public class class401 implements class399 {
+	@ObfuscatedName("q")
+	final Map field4440;
 
-	static {
-		field4284 = new int[2048]; // L: 13
-		field4285 = new int[2048]; // L: 14
-		double var0 = 0.0030679615757712823D; // L: 17
+	public class401(Map var1) {
+		this.field4440 = var1; // L: 11
+	} // L: 12
 
-		for (int var2 = 0; var2 < 2048; ++var2) { // L: 18
-			field4284[var2] = (int)(65536.0D * Math.sin((double)var2 * var0)); // L: 19
-			field4285[var2] = (int)(65536.0D * Math.cos(var0 * (double)var2)); // L: 20
-		}
-
-	} // L: 22
-
-	@ObfuscatedName("ir")
+	@ObfuscatedName("o")
 	@ObfuscatedSignature(
-		descriptor = "(Lhu;IIZI)V",
-		garbageValue = "771513192"
+		descriptor = "(I)[B",
+		garbageValue = "-2132228640"
 	)
-	@Export("alignWidgetSize")
-	static void alignWidgetSize(Widget var0, int var1, int var2, boolean var3) {
-		int var4 = var0.width; // L: 9996
-		int var5 = var0.height; // L: 9997
-		if (var0.widthAlignment == 0) { // L: 9998
-			var0.width = var0.rawWidth;
-		} else if (var0.widthAlignment == 1) { // L: 9999
-			var0.width = var1 - var0.rawWidth;
-		} else if (var0.widthAlignment == 2) { // L: 10000
-			var0.width = var0.rawWidth * var1 >> 14;
+	public byte[] vmethod6962() throws UnsupportedEncodingException {
+		return this.method6961().getBytes("UTF-8"); // L: 16
+	}
+
+	@ObfuscatedName("l")
+	@ObfuscatedSignature(
+		descriptor = "(I)Ljava/lang/String;",
+		garbageValue = "685635787"
+	)
+	public String method6961() throws UnsupportedEncodingException {
+		StringBuilder var1 = new StringBuilder(); // L: 20
+		Iterator var2 = this.field4440.entrySet().iterator(); // L: 21
+
+		while (var2.hasNext()) {
+			Entry var3 = (Entry)var2.next(); // L: 22
+			String var4 = URLEncoder.encode((String)var3.getKey(), "UTF-8");
+			String var5 = URLEncoder.encode((String)var3.getValue(), "UTF-8");
+			var1.append(var4).append("=").append(var5).append("&");
 		}
 
-		if (var0.heightAlignment == 0) { // L: 10001
-			var0.height = var0.rawHeight;
-		} else if (var0.heightAlignment == 1) { // L: 10002
-			var0.height = var2 - var0.rawHeight;
-		} else if (var0.heightAlignment == 2) { // L: 10003
-			var0.height = var2 * var0.rawHeight >> 14;
+		if (var1.length() == 0) {
+			return "";
+		} else {
+			var1.deleteCharAt(var1.length() - 1);
+			var1.insert(0, "?"); // L: 31
+			return var1.toString(); // L: 32
 		}
+	}
 
-		if (var0.widthAlignment == 4) { // L: 10004
-			var0.width = var0.height * var0.field2614 / var0.field2642;
+	@ObfuscatedName("q")
+	@ObfuscatedSignature(
+		descriptor = "(II)Lgp;",
+		garbageValue = "-961996891"
+	)
+	@Export("StructDefinition_getStructDefinition")
+	public static StructComposition StructDefinition_getStructDefinition(int var0) {
+		StructComposition var1 = (StructComposition)StructComposition.StructDefinition_cached.get((long)var0); // L: 23
+		if (var1 != null) { // L: 24
+			return var1;
+		} else {
+			byte[] var2 = StructComposition.StructDefinition_archive.takeFile(34, var0); // L: 25
+			var1 = new StructComposition(); // L: 26
+			if (var2 != null) { // L: 27
+				var1.decode(new Buffer(var2));
+			}
+
+			var1.postDecode(); // L: 28
+			StructComposition.StructDefinition_cached.put(var1, (long)var0); // L: 29
+			return var1; // L: 30
 		}
+	}
 
-		if (var0.heightAlignment == 4) { // L: 10005
-			var0.height = var0.width * var0.field2642 / var0.field2614;
+	@ObfuscatedName("jp")
+	@ObfuscatedSignature(
+		descriptor = "(Lki;B)Z",
+		garbageValue = "-1"
+	)
+	@Export("runCs1")
+	static final boolean runCs1(Widget var0) {
+		if (var0.cs1Comparisons == null) { // L: 10886
+			return false;
+		} else {
+			for (int var1 = 0; var1 < var0.cs1Comparisons.length; ++var1) { // L: 10887
+				int var2 = Players.method2413(var0, var1); // L: 10888
+				int var3 = var0.cs1ComparisonValues[var1]; // L: 10889
+				if (var0.cs1Comparisons[var1] == 2) { // L: 10890
+					if (var2 >= var3) { // L: 10891
+						return false;
+					}
+				} else if (var0.cs1Comparisons[var1] == 3) { // L: 10893
+					if (var2 <= var3) { // L: 10894
+						return false;
+					}
+				} else if (var0.cs1Comparisons[var1] == 4) { // L: 10896
+					if (var2 == var3) { // L: 10897
+						return false;
+					}
+				} else if (var3 != var2) { // L: 10899
+					return false;
+				}
+			}
+
+			return true; // L: 10901
 		}
-
-		if (var0.contentType == 1337) { // L: 10006
-			Client.viewportWidget = var0;
-		}
-
-		if (var3 && var0.onResize != null && (var4 != var0.width || var5 != var0.height)) { // L: 10007
-			ScriptEvent var6 = new ScriptEvent(); // L: 10008
-			var6.widget = var0; // L: 10009
-			var6.args = var0.onResize; // L: 10010
-			Client.scriptEvents.addFirst(var6); // L: 10011
-		}
-
-	} // L: 10013
+	}
 }

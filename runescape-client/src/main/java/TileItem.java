@@ -4,30 +4,29 @@ import net.runelite.mapping.ObfuscatedGetter;
 import net.runelite.mapping.ObfuscatedName;
 import net.runelite.mapping.ObfuscatedSignature;
 
-@ObfuscatedName("dg")
+@ObfuscatedName("cg")
 @Implements("TileItem")
 public final class TileItem extends Renderable {
-	@ObfuscatedName("b")
-	@ObfuscatedSignature(
-		descriptor = "Low;"
-	)
-	@Export("titleboxSprite")
-	static IndexedSprite titleboxSprite;
-	@ObfuscatedName("l")
-	@ObfuscatedSignature(
-		descriptor = "Low;"
-	)
-	@Export("options_buttons_0Sprite")
-	static IndexedSprite options_buttons_0Sprite;
-	@ObfuscatedName("f")
+	@ObfuscatedName("sb")
 	@ObfuscatedGetter(
-		intValue = -52258563
+		intValue = -1684889403
+	)
+	static int field1292;
+	@ObfuscatedName("ev")
+	@ObfuscatedSignature(
+		descriptor = "Lle;"
+	)
+	@Export("archive9")
+	static Archive archive9;
+	@ObfuscatedName("o")
+	@ObfuscatedGetter(
+		intValue = -2046412949
 	)
 	@Export("id")
 	int id;
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedGetter(
-		intValue = -438803775
+		intValue = 129863863
 	)
 	@Export("quantity")
 	int quantity;
@@ -35,22 +34,26 @@ public final class TileItem extends Renderable {
 	TileItem() {
 	} // L: 11
 
-	@ObfuscatedName("o")
+	@ObfuscatedName("q")
 	@ObfuscatedSignature(
-		descriptor = "(I)Lgv;",
-		garbageValue = "1835906978"
+		descriptor = "(I)Lhv;",
+		garbageValue = "-238822980"
 	)
 	@Export("getModel")
 	protected final Model getModel() {
-		return class23.ItemDefinition_get(this.id).getModel(this.quantity); // L: 14
+		return FileSystem.ItemDefinition_get(this.id).getModel(this.quantity); // L: 14
 	}
 
-	@ObfuscatedName("as")
+	@ObfuscatedName("fk")
 	@ObfuscatedSignature(
-		descriptor = "(II)I",
-		garbageValue = "936749737"
+		descriptor = "(Lgq;IIIB)V",
+		garbageValue = "11"
 	)
-	static int method2266(int var0) {
-		return (int)Math.pow(2.0D, (double)((float)var0 / 256.0F + 7.0F)); // L: 3461
-	}
+	static void method2407(SequenceDefinition var0, int var1, int var2, int var3) {
+		if (Client.soundEffectCount < 50 && class12.clientPreferences.method2239() != 0) { // L: 3768
+			if (var0.field2209 != null && var0.field2209.containsKey(var1)) { // L: 3769
+				MouseHandler.method588((Integer)var0.field2209.get(var1), var2, var3); // L: 3770
+			}
+		}
+	} // L: 3771
 }
